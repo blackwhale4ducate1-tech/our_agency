@@ -6,6 +6,9 @@ import { Star, Quote, Sparkles, ArrowRight, ChevronLeft, ChevronRight, Play } fr
 
 import { AnimatedTitle } from "./animated-title";
 import { getAnimationSettings } from "@/lib/performance";
+import { useTheme } from "@/context/ThemeContext";
+import { cn } from "@/lib/utils";
+import { COMPANY } from "@/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -106,21 +109,27 @@ StarRating.displayName = "StarRating";
 const TestimonialCard = memo(({
     testimonial,
     index,
-    isActive
+    isActive,
+    isDark
 }: {
     testimonial: typeof testimonials[0];
     index: number;
     isActive: boolean;
+    isDark: boolean;
 }) => {
     const cardRef = useRef<HTMLDivElement>(null);
 
     return (
         <div
             ref={cardRef}
-            className={`testimonial-card group relative overflow-hidden rounded-3xl border transition-all duration-500 ${isActive
-                ? 'border-white/30 bg-gradient-to-br from-white/15 to-white/5 scale-105 shadow-2xl z-10'
-                : 'border-white/10 bg-gradient-to-br from-white/10 to-white/5 hover:border-white/20'
-                }`}
+            className={cn(
+                "testimonial-card group relative overflow-hidden rounded-3xl border transition-all duration-500",
+                isActive
+                    ? 'border-white/30 bg-gradient-to-br from-white/15 to-white/5 scale-105 shadow-2xl z-10'
+                    : isDark
+                        ? 'border-white/10 bg-gradient-to-br from-white/10 to-white/5 hover:border-white/20'
+                        : 'border-gray-200 bg-white/90 hover:border-gray-300 shadow-sm'
+            )}
             style={{ opacity: 0, transform: 'translateY(60px) rotateX(10deg)' }}
             data-index={index}
         >
@@ -136,7 +145,7 @@ const TestimonialCard = memo(({
             </div>
 
             {/* Quote watermark */}
-            <div className="absolute top-6 right-6 text-white/5">
+            <div className={isDark ? "absolute top-6 right-6 text-white/5" : "absolute top-6 right-6 text-gray-100"}>
                 <Quote className="w-20 h-20 fill-current" />
             </div>
 
@@ -146,7 +155,10 @@ const TestimonialCard = memo(({
                     {/* Avatar with ring */}
                     <div className="relative">
                         <div className={`absolute -inset-1 bg-gradient-to-r ${testimonial.gradient} rounded-full blur opacity-75`} />
-                        <div className={`relative w-16 h-16 rounded-full overflow-hidden ring-2 ring-offset-2 ring-offset-black ring-white/20`}>
+                        <div className={cn(
+                            "relative w-16 h-16 rounded-full overflow-hidden ring-2 ring-offset-2",
+                            isDark ? "ring-offset-black ring-white/20" : "ring-offset-white ring-gray-200"
+                        )}>
                             <img
                                 src={testimonial.image}
                                 alt={testimonial.name}
@@ -156,14 +168,20 @@ const TestimonialCard = memo(({
                             />
                         </div>
                         {/* Online indicator */}
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center">
+                        <div className={cn(
+                            "absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 flex items-center justify-center",
+                            isDark ? "border-black" : "border-white"
+                        )}>
                             <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                         </div>
                     </div>
 
                     <div className="flex-1">
-                        <h4 className="text-lg font-bold text-white">{testimonial.name}</h4>
-                        <p className="text-sm text-gray-400">{testimonial.position}</p>
+                        <h4 className={cn(
+                            "text-lg font-bold",
+                            isDark ? "text-white" : "text-gray-800"
+                        )}>{testimonial.name}</h4>
+                        <p className={isDark ? "text-sm text-gray-400" : "text-sm text-gray-500"}>{testimonial.position}</p>
                         <p className={`text-sm font-medium bg-gradient-to-r ${testimonial.gradient} bg-clip-text text-transparent`}>
                             {testimonial.company}
                         </p>
@@ -176,7 +194,10 @@ const TestimonialCard = memo(({
                 </div>
 
                 {/* Testimonial text */}
-                <p className="text-gray-300 leading-relaxed text-sm mb-6">
+                <p className={cn(
+                    "leading-relaxed text-sm mb-6",
+                    isDark ? "text-gray-300" : "text-gray-600"
+                )}>
                     "{testimonial.text}"
                 </p>
 
@@ -193,11 +214,19 @@ const TestimonialCard = memo(({
 TestimonialCard.displayName = "TestimonialCard";
 
 // Featured testimonial (large showcase)
-const FeaturedTestimonial = memo(({ testimonial }: { testimonial: typeof testimonials[0] }) => (
-    <div className="featured-testimonial relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
+const FeaturedTestimonial = memo(({ testimonial, isDark }: { testimonial: typeof testimonials[0]; isDark: boolean }) => (
+    <div className={cn(
+        "featured-testimonial relative overflow-hidden rounded-3xl border backdrop-blur-sm",
+        isDark
+            ? "border-white/20 bg-gradient-to-br from-white/10 to-white/5"
+            : "border-gray-200 bg-white/90 shadow-xl"
+    )}>
         {/* Background elements */}
         <div className={`absolute top-0 right-0 w-96 h-96 bg-gradient-to-br ${testimonial.gradient} rounded-full blur-3xl opacity-20`} />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className={cn(
+            "absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl",
+            isDark ? "bg-blue-500/20" : "bg-blue-300/30"
+        )} />
 
         {/* Top accent */}
         <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${testimonial.gradient}`} />
@@ -209,7 +238,10 @@ const FeaturedTestimonial = memo(({ testimonial }: { testimonial: typeof testimo
                     {/* Large avatar */}
                     <div className="relative">
                         <div className={`absolute -inset-3 bg-gradient-to-r ${testimonial.gradient} rounded-full blur-lg opacity-50 animate-pulse`} />
-                        <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-white/20">
+                        <div className={cn(
+                            "relative w-32 h-32 rounded-full overflow-hidden ring-4",
+                            isDark ? "ring-white/20" : "ring-gray-200"
+                        )}>
                             <img
                                 src={testimonial.image}
                                 alt={testimonial.name}
@@ -220,8 +252,11 @@ const FeaturedTestimonial = memo(({ testimonial }: { testimonial: typeof testimo
                     </div>
 
                     <div className="text-center lg:text-left">
-                        <h3 className="text-2xl font-bold text-white mb-1">{testimonial.name}</h3>
-                        <p className="text-gray-400">{testimonial.position}</p>
+                        <h3 className={cn(
+                            "text-2xl font-bold mb-1",
+                            isDark ? "text-white" : "text-gray-800"
+                        )}>{testimonial.name}</h3>
+                        <p className={isDark ? "text-gray-400" : "text-gray-500"}>{testimonial.position}</p>
                         <p className={`font-semibold bg-gradient-to-r ${testimonial.gradient} bg-clip-text text-transparent`}>
                             {testimonial.company}
                         </p>
@@ -239,7 +274,10 @@ const FeaturedTestimonial = memo(({ testimonial }: { testimonial: typeof testimo
                 {/* Right: Quote */}
                 <div className="lg:w-2/3">
                     <Quote className={`w-16 h-16 mb-6 opacity-50 fill-current bg-gradient-to-r ${testimonial.gradient} bg-clip-text text-transparent`} />
-                    <p className="text-xl md:text-2xl text-white leading-relaxed mb-8">
+                    <p className={cn(
+                        "text-xl md:text-2xl leading-relaxed mb-8",
+                        isDark ? "text-white" : "text-gray-800"
+                    )}>
                         "{testimonial.text}"
                     </p>
 
@@ -260,6 +298,7 @@ export const Testimonials = memo(() => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [featuredIndex, setFeaturedIndex] = useState(0);
     const animSettings = getAnimationSettings();
+    const { isDark } = useTheme();
 
     const nextFeatured = useCallback(() => {
         setFeaturedIndex((prev) => (prev + 1) % testimonials.length);
@@ -346,26 +385,6 @@ export const Testimonials = memo(() => {
                     });
                 }
             });
-
-            // Star icons stagger animation
-            gsap.utils.toArray<HTMLElement>(".star-icon").forEach((star, i) => {
-                gsap.fromTo(star,
-                    { scale: 0, rotate: -180 },
-                    {
-                        scale: 1,
-                        rotate: 0,
-                        duration: 0.4,
-                        ease: "back.out(2)",
-                        scrollTrigger: {
-                            trigger: star,
-                            start: "top 90%",
-                            toggleActions: "play none none none"
-                        },
-                        delay: i * 0.05
-                    }
-                );
-            });
-
         }, containerRef);
 
         return () => {
@@ -375,48 +394,85 @@ export const Testimonials = memo(() => {
     }, [animSettings.shouldAnimate, animSettings.enableHoverEffects]);
 
     return (
-        <section id="testimonials" className="relative min-h-screen w-screen bg-black py-32 overflow-hidden">
+        <section id="testimonials" className={cn(
+            "relative min-h-screen w-screen py-32 overflow-hidden",
+            isDark ? "bg-black" : "bg-gray-50"
+        )}>
             {/* Animated Background */}
             <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/50 to-black" />
+                <div className={cn(
+                    "absolute inset-0",
+                    isDark
+                        ? "bg-gradient-to-b from-black via-gray-900/50 to-black"
+                        : "bg-gradient-to-b from-gray-50 via-white/50 to-gray-50"
+                )} />
                 {animSettings.enableBlur && (
                     <>
-                        <div className="absolute top-20 right-20 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-                        <div className="absolute bottom-40 left-20 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
-                        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '12s' }} />
+                        <div className={cn(
+                            "absolute top-20 right-20 w-96 h-96 rounded-full blur-3xl animate-pulse",
+                            isDark ? "bg-violet-500/10" : "bg-violet-300/20"
+                        )} style={{ animationDuration: '8s' }} />
+                        <div className={cn(
+                            "absolute bottom-40 left-20 w-64 h-64 rounded-full blur-3xl animate-pulse",
+                            isDark ? "bg-blue-500/10" : "bg-blue-300/20"
+                        )} style={{ animationDuration: '10s' }} />
                     </>
                 )}
             </div>
 
             {/* Grid pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:64px_64px]" />
+            <div className={cn(
+                "absolute inset-0",
+                isDark
+                    ? "bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:64px_64px]"
+                    : "bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:64px_64px]"
+            )} />
 
             <div ref={containerRef} className="relative z-10 container mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-20">
-                    <div id="testimonials-badge" className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 mb-8">
+                    <div id="testimonials-badge" className={cn(
+                        "inline-flex items-center gap-3 px-6 py-3 rounded-full border mb-8",
+                        isDark
+                            ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30"
+                            : "bg-gradient-to-r from-yellow-100 to-orange-100 border-yellow-200"
+                    )}>
                         <Sparkles className="w-5 h-5 text-yellow-400" />
-                        <span className="text-sm font-semibold text-white">Client Success Stories</span>
+                        <span className={cn(
+                            "text-sm font-semibold",
+                            isDark ? "text-white" : "text-gray-800"
+                        )}>Client Success Stories</span>
                     </div>
 
-                    <AnimatedTitle containerClass="!text-white text-center">
+                    <AnimatedTitle containerClass={cn(
+                        "text-center",
+                        isDark ? "!text-white" : "!text-gray-800"
+                    )}>
                         {"What Our Cl<b>i</b>ents S<b>a</b>y"}
                     </AnimatedTitle>
 
-                    <p className="text-gray-400 max-w-2xl mx-auto mt-8 text-lg leading-relaxed">
-                        Don't just take our word for it. Here's what industry leaders say about working with us.
+                    <p className={cn(
+                        "max-w-2xl mx-auto mt-8 text-lg leading-relaxed",
+                        isDark ? "text-gray-400" : "text-gray-600"
+                    )}>
+                        Don't just take our word for it. Here's what industry leaders say about working with {COMPANY.name}.
                     </p>
                 </div>
 
                 {/* Featured Testimonial */}
                 <div className="mb-20">
-                    <FeaturedTestimonial testimonial={testimonials[featuredIndex]} />
+                    <FeaturedTestimonial testimonial={testimonials[featuredIndex]} isDark={isDark} />
 
                     {/* Navigation */}
                     <div className="flex items-center justify-center gap-4 mt-6">
                         <button
                             onClick={prevFeatured}
-                            className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+                            className={cn(
+                                "p-3 rounded-full border transition-colors",
+                                isDark
+                                    ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-100"
+                            )}
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
@@ -426,15 +482,24 @@ export const Testimonials = memo(() => {
                                 <button
                                     key={i}
                                     onClick={() => setFeaturedIndex(i)}
-                                    className={`w-2 h-2 rounded-full transition-all duration-300 ${featuredIndex === i ? 'bg-white w-8' : 'bg-white/30 hover:bg-white/50'
-                                        }`}
+                                    className={cn(
+                                        "h-2 rounded-full transition-all duration-300",
+                                        featuredIndex === i
+                                            ? isDark ? 'bg-white w-8' : 'bg-gray-800 w-8'
+                                            : isDark ? 'bg-white/30 hover:bg-white/50 w-2' : 'bg-gray-300 hover:bg-gray-400 w-2'
+                                    )}
                                 />
                             ))}
                         </div>
 
                         <button
                             onClick={nextFeatured}
-                            className="p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+                            className={cn(
+                                "p-3 rounded-full border transition-colors",
+                                isDark
+                                    ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-100"
+                            )}
                         >
                             <ChevronRight className="w-5 h-5" />
                         </button>
@@ -449,6 +514,7 @@ export const Testimonials = memo(() => {
                             testimonial={testimonial}
                             index={index}
                             isActive={false}
+                            isDark={isDark}
                         />
                     ))}
                 </div>
@@ -456,7 +522,9 @@ export const Testimonials = memo(() => {
                 {/* CTA Section */}
                 <div className="text-center mt-20">
                     <div className="inline-flex flex-col items-center gap-6">
-                        <p className="text-gray-400 text-lg">Ready to become our next success story?</p>
+                        <p className={isDark ? "text-gray-400 text-lg" : "text-gray-500 text-lg"}>
+                            Ready to become our next success story?
+                        </p>
                         <button className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-10 py-5 rounded-full font-bold text-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/30">
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                             <span className="relative">Start Your Project Today</span>

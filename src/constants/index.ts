@@ -10,8 +10,21 @@ export const NAV_ITEMS = [
   { label: "Contact", href: "/contact" },
 ] as const;
 
-export const LINKS = {
-  sourceCode: "https://github.com/sanidhyy/game-website",
+// Company Information
+export const COMPANY = {
+  name: "4DK Teams",
+  tagline: "Innovative Digital Solutions",
+  email: "contact@4dkteams.com",
+  phone: "+91 98765 43210",
+  address: "Chennai, Tamil Nadu, India",
+} as const;
+
+// Google Form URLs - Contact form with name, email, message, and company fields
+export const GOOGLE_FORMS = {
+  // Contact page form - embedded version
+  contact: "https://docs.google.com/forms/d/e/1FAIpQLSeTog1PqpY140KDYKiHXTOgdEYqfYxwIU-8maYiGGUjdSFDnw/viewform?embedded=true",
+  // Home page inquiry form - same form embedded
+  inquiry: "https://docs.google.com/forms/d/e/1FAIpQLSeTog1PqpY140KDYKiHXTOgdEYqfYxwIU-8maYiGGUjdSFDnw/viewform?embedded=true",
 } as const;
 
 export const SOCIAL_LINKS = [

@@ -6,12 +6,16 @@ import { memo, useCallback } from "react";
 
 import { AnimatedTitle } from "./animated-title";
 import { getAnimationSettings } from "@/lib/performance";
+import { useTheme } from "@/context/ThemeContext";
+import { cn } from "@/lib/utils";
+import { COMPANY } from "@/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export const About = memo(() => {
   const navigate = useNavigate();
   const animSettings = getAnimationSettings();
+  const { isDark } = useTheme();
 
   const handleLearnMore = useCallback(() => {
     navigate('/about');
@@ -43,27 +47,40 @@ export const About = memo(() => {
   });
 
   return (
-    <div id="about" className="min-h-screen w-screen bg-black">
+    <div id="about" className={cn(
+      "min-h-screen w-screen",
+      isDark ? "bg-black" : "bg-gray-50"
+    )}>
       <div className="relative mb-8 mt-36 flex flex-col items-center gap-5">
-        <p className="font-general text-sm uppercase md:text-[10px] text-gray-400">
-          About Our Development Company
+        <p className={cn(
+          "font-general text-sm uppercase md:text-[10px]",
+          isDark ? "text-gray-400" : "text-gray-500"
+        )}>
+          About {COMPANY.name}
         </p>
 
-        <AnimatedTitle containerClass="mt-5 !text-white text-center">
+        <AnimatedTitle containerClass={cn(
+          "mt-5 text-center",
+          isDark ? "!text-white" : "!text-gray-800"
+        )}>
           {
             "Craft<b>i</b>ng Digital Solut<b>i</b>ons <br />for Tomorrow&apos;s World"
           }
         </AnimatedTitle>
 
         <div className="about-subtext">
-          <p className="text-gray-300">We are a passionate team of developers, designers, and innovators</p>
-          <p className="text-gray-300">Transforming ideas into powerful digital experiences that drive success</p>
+          <p className={isDark ? "text-gray-300" : "text-gray-600"}>
+            We are a passionate team of developers, designers, and innovators at {COMPANY.name}
+          </p>
+          <p className={isDark ? "text-gray-300" : "text-gray-600"}>
+            Transforming ideas into powerful digital experiences that drive success
+          </p>
         </div>
 
         <div className="mt-8">
           <button
             onClick={handleLearnMore}
-            className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-8 py-3 rounded-full font-semibold transition-transform duration-200 active:scale-95 shadow-lg"
+            className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black px-8 py-3 rounded-full font-semibold transition-transform duration-200 active:scale-95 shadow-lg hover:shadow-xl"
           >
             Learn More About Us
           </button>

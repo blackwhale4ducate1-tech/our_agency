@@ -4,6 +4,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link } from "react-router-dom";
 import { Sparkles, ChevronDown, Rocket, Zap, Globe, Shield, Code, Server } from "lucide-react";
 import { getAnimationSettings } from "@/lib/performance";
+import { useTheme } from "@/context/ThemeContext";
+import { cn } from "@/lib/utils";
+import { COMPANY } from "@/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -67,16 +70,23 @@ const products = [
 // Memoized product card
 const ProductCard = memo(({
   product,
-  index
+  index,
+  isDark
 }: {
   product: typeof products[0];
   index: number;
+  isDark: boolean;
 }) => {
   const Icon = product.icon;
 
   return (
     <div
-      className="product-card relative rounded-3xl overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-sm transition-all duration-300 hover:border-white/20"
+      className={cn(
+        "product-card relative rounded-3xl overflow-hidden border backdrop-blur-sm transition-all duration-300",
+        isDark
+          ? "border-white/10 bg-gradient-to-br from-white/5 to-white/0 hover:border-white/20"
+          : "border-gray-200 bg-white/90 hover:border-gray-300 shadow-sm hover:shadow-md"
+      )}
       style={{ opacity: 0, transform: 'translateY(60px) scale(0.95)' }}
       data-index={index}
     >
@@ -105,16 +115,29 @@ const ProductCard = memo(({
         <h3 className={`text-2xl font-bold mb-2 bg-gradient-to-r ${product.gradient} bg-clip-text text-transparent`}>
           {product.name}
         </h3>
-        <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+        <p className={cn(
+          "text-sm mb-4 leading-relaxed",
+          isDark ? "text-gray-300" : "text-gray-600"
+        )}>
           {product.description}
         </p>
 
         {/* Tags */}
         <div className="flex items-center gap-2 mb-4">
-          <span className="px-3 py-1 rounded-full text-xs bg-white/10 border border-white/10 text-gray-300">
+          <span className={cn(
+            "px-3 py-1 rounded-full text-xs border",
+            isDark
+              ? "bg-white/10 border-white/10 text-gray-300"
+              : "bg-gray-100 border-gray-200 text-gray-600"
+          )}>
             Enterprise
           </span>
-          <span className="px-3 py-1 rounded-full text-xs bg-white/10 border border-white/10 text-gray-300">
+          <span className={cn(
+            "px-3 py-1 rounded-full text-xs border",
+            isDark
+              ? "bg-white/10 border-white/10 text-gray-300"
+              : "bg-gray-100 border-gray-200 text-gray-600"
+          )}>
             API Ready
           </span>
         </div>
@@ -180,6 +203,7 @@ export const ProductPage = memo(() => {
   const hTrackRef = useRef<HTMLDivElement>(null);
   const [activeProduct, setActiveProduct] = useState(0);
   const animSettings = getAnimationSettings();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (!animSettings.shouldAnimate) {
@@ -276,26 +300,6 @@ export const ProductPage = memo(() => {
             }
           },
         });
-
-        // Fade in each section as it enters
-        sections.forEach((sec) => {
-          gsap.fromTo(sec,
-            { opacity: 0.5, scale: 0.95 },
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.5,
-              ease: "power2.out",
-              scrollTrigger: {
-                trigger: sec,
-                start: "left 80%",
-                end: "left 20%",
-                containerAnimation: gsap.getById("horizontal-scroll"),
-                toggleActions: "play none none reverse"
-              }
-            }
-          );
-        });
       }
     });
 
@@ -303,18 +307,31 @@ export const ProductPage = memo(() => {
       ctx.revert();
       ScrollTrigger.getAll().forEach(st => st.kill());
     };
-  }, [animSettings.shouldAnimate, animSettings.enableHoverEffects]);
+  }, [animSettings.shouldAnimate, animSettings.enableHoverEffects, activeProduct]);
 
   return (
-    <div className="min-h-screen w-screen bg-black text-white overflow-hidden">
-      {/* Animated Background - FAQ style colors */}
+    <div className={cn(
+      "min-h-screen w-screen overflow-hidden",
+      isDark ? "bg-black text-white" : "bg-gray-50 text-gray-800"
+    )}>
+      {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-emerald-900/20" />
+        <div className={cn(
+          "absolute inset-0",
+          isDark
+            ? "bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-emerald-900/20"
+            : "bg-gradient-to-br from-purple-100/30 via-blue-100/20 to-emerald-100/30"
+        )} />
         {animSettings.enableBlur && (
           <>
-            <div className="absolute top-1/4 left-1/4 h-80 w-80 rounded-full bg-purple-500/15 blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-blue-500/15 blur-3xl" />
-            <div className="absolute top-1/2 right-1/3 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className={cn(
+              "absolute top-1/4 left-1/4 h-80 w-80 rounded-full blur-3xl",
+              isDark ? "bg-purple-500/15" : "bg-purple-300/25"
+            )} />
+            <div className={cn(
+              "absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full blur-3xl",
+              isDark ? "bg-blue-500/15" : "bg-blue-300/25"
+            )} />
           </>
         )}
       </div>
@@ -323,9 +340,15 @@ export const ProductPage = memo(() => {
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
         <div ref={heroRef} className="relative z-10 text-center max-w-6xl mx-auto">
           {/* Badge */}
-          <div className="hero-badge inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8">
+          <div className={cn(
+            "hero-badge inline-flex items-center gap-2 px-5 py-2.5 rounded-full border backdrop-blur-sm mb-8",
+            isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
+          )}>
             <Sparkles className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm font-medium text-gray-300">Premium Solutions</span>
+            <span className={cn(
+              "text-sm font-medium",
+              isDark ? "text-gray-300" : "text-gray-600"
+            )}>Premium Solutions by {COMPANY.name}</span>
           </div>
 
           {/* Title */}
@@ -336,11 +359,17 @@ export const ProductPage = memo(() => {
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-subtitle text-xl md:text-2xl text-gray-300 mb-6 max-w-4xl mx-auto leading-relaxed">
+          <p className={cn(
+            "hero-subtitle text-xl md:text-2xl mb-6 max-w-4xl mx-auto leading-relaxed",
+            isDark ? "text-gray-300" : "text-gray-600"
+          )}>
             Built for businesses and innovators. Engineered for performance, scalability, and success.
           </p>
 
-          <p className="text-base text-gray-400 mb-12 max-w-2xl mx-auto">
+          <p className={cn(
+            "text-base mb-12 max-w-2xl mx-auto",
+            isDark ? "text-gray-400" : "text-gray-500"
+          )}>
             Explore our comprehensive suite of development solutions designed to transform your digital vision into reality
           </p>
 
@@ -354,14 +383,22 @@ export const ProductPage = memo(() => {
             </Link>
             <a
               href="#catalog"
-              className="border-2 border-white/20 hover:border-white/40 text-white font-semibold py-4 px-8 rounded-full text-lg transition-all hover:bg-white/5"
+              className={cn(
+                "border-2 font-semibold py-4 px-8 rounded-full text-lg transition-all",
+                isDark
+                  ? "border-white/20 hover:border-white/40 text-white hover:bg-white/5"
+                  : "border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-100"
+              )}
             >
               Explore Catalog
             </a>
           </div>
 
           {/* Scroll indicator */}
-          <div className="scroll-indicator flex flex-col items-center gap-2 text-white/50">
+          <div className={cn(
+            "scroll-indicator flex flex-col items-center gap-2",
+            isDark ? "text-white/50" : "text-gray-400"
+          )}>
             <span className="text-sm">Scroll to explore</span>
             <ChevronDown className="w-6 h-6" />
           </div>
@@ -373,16 +410,25 @@ export const ProductPage = memo(() => {
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 mb-6">
+            <div className={cn(
+              "inline-flex items-center gap-2 px-5 py-2.5 rounded-full border mb-6",
+              isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
+            )}>
               <Rocket className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium text-gray-300">Featured Products</span>
+              <span className={cn(
+                "text-sm font-medium",
+                isDark ? "text-gray-300" : "text-gray-600"
+              )}>Featured Products</span>
             </div>
             <h2 className="text-4xl md:text-6xl font-black mb-4">
               <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
                 Development Solutions
               </span>
             </h2>
-            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+            <p className={cn(
+              "text-lg max-w-2xl mx-auto",
+              isDark ? "text-gray-400" : "text-gray-500"
+            )}>
               Everything you need to build, deploy, and scale modern applications
             </p>
           </div>
@@ -390,7 +436,7 @@ export const ProductPage = memo(() => {
           {/* Product Grid */}
           <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {products.map((product, i) => (
-              <ProductCard key={product.id} product={product} index={i} />
+              <ProductCard key={product.id} product={product} index={i} isDark={isDark} />
             ))}
           </div>
         </div>
@@ -405,7 +451,9 @@ export const ProductPage = memo(() => {
               Featured Showcase
             </span>
           </h2>
-          <p className="text-lg text-gray-400">Scroll horizontally to explore our featured products</p>
+          <p className={isDark ? "text-lg text-gray-400" : "text-lg text-gray-500"}>
+            Scroll horizontally to explore our featured products
+          </p>
         </div>
 
         {/* Horizontal Track */}
@@ -425,10 +473,12 @@ export const ProductPage = memo(() => {
           {products.slice(0, 5).map((_, idx) => (
             <div
               key={idx}
-              className={`w-2 transition-all duration-300 rounded-full ${activeProduct === idx
-                ? 'bg-white h-8'
-                : 'bg-white/30 h-2'
-                }`}
+              className={cn(
+                "w-2 transition-all duration-300 rounded-full",
+                activeProduct === idx
+                  ? isDark ? 'bg-white h-8' : 'bg-gray-800 h-8'
+                  : isDark ? 'bg-white/30 h-2' : 'bg-gray-400 h-2'
+              )}
             />
           ))}
         </div>
@@ -436,12 +486,23 @@ export const ProductPage = memo(() => {
 
       {/* CTA Section */}
       <section className="relative py-32 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 via-blue-900/30 to-emerald-900/30" />
+        <div className={cn(
+          "absolute inset-0",
+          isDark
+            ? "bg-gradient-to-r from-purple-900/30 via-blue-900/30 to-emerald-900/30"
+            : "bg-gradient-to-r from-purple-100/50 via-blue-100/50 to-emerald-100/50"
+        )} />
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 mb-8">
+          <div className={cn(
+            "inline-flex items-center gap-2 px-5 py-2.5 rounded-full border mb-8",
+            isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
+          )}>
             <Zap className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm font-medium text-gray-300">Get Started Today</span>
+            <span className={cn(
+              "text-sm font-medium",
+              isDark ? "text-gray-300" : "text-gray-600"
+            )}>Get Started Today</span>
           </div>
 
           <h2 className="text-5xl md:text-7xl font-black mb-6">
@@ -450,8 +511,11 @@ export const ProductPage = memo(() => {
             </span>
           </h2>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Join thousands of developers and businesses building the future with our solutions
+          <p className={cn(
+            "text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed",
+            isDark ? "text-gray-300" : "text-gray-600"
+          )}>
+            Join clients building the future with {COMPANY.name} solutions
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -463,7 +527,12 @@ export const ProductPage = memo(() => {
             </Link>
             <Link
               to="/pricing"
-              className="border-2 border-white/20 hover:border-white/40 text-white font-semibold py-5 px-10 rounded-full text-xl transition-all hover:bg-white/5"
+              className={cn(
+                "border-2 font-semibold py-5 px-10 rounded-full text-xl transition-all",
+                isDark
+                  ? "border-white/20 hover:border-white/40 text-white hover:bg-white/5"
+                  : "border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-100"
+              )}
             >
               View Pricing
             </Link>
@@ -472,17 +541,25 @@ export const ProductPage = memo(() => {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
             {[
-              { icon: Globe, label: "150+", desc: "Countries Served" },
-              { icon: Rocket, label: "10K+", desc: "Active Projects" },
-              { icon: Shield, label: "99.9%", desc: "Uptime Guarantee" }
+              { icon: Globe, label: "50+", desc: "Happy Clients" },
+              { icon: Rocket, label: "100+", desc: "Projects Delivered" },
+              { icon: Shield, label: "99.9%", desc: "Client Satisfaction" }
             ].map((stat, idx) => (
               <div
                 key={idx}
-                className="p-6 rounded-2xl bg-white/5 border border-white/10 transition-all duration-200 hover:bg-white/10"
+                className={cn(
+                  "p-6 rounded-2xl border transition-all duration-200",
+                  isDark
+                    ? "bg-white/5 border-white/10 hover:bg-white/10"
+                    : "bg-white border-gray-200 shadow-sm hover:shadow-md"
+                )}
               >
                 <stat.icon className="w-10 h-10 mx-auto mb-4 text-blue-400" />
-                <div className="text-4xl font-bold text-white mb-1">{stat.label}</div>
-                <div className="text-gray-400">{stat.desc}</div>
+                <div className={cn(
+                  "text-4xl font-bold mb-1",
+                  isDark ? "text-white" : "text-gray-800"
+                )}>{stat.label}</div>
+                <div className={isDark ? "text-gray-400" : "text-gray-500"}>{stat.desc}</div>
               </div>
             ))}
           </div>

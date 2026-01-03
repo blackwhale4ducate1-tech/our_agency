@@ -4,6 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Custom Properties for Theme */
+:root {
+  --bg-primary: #0a0a1a;
+  --bg-secondary: #121225;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --accent-primary: #8b5cf6;
+  --accent-secondary: #ec4899;
+}
+
+:root.light {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-primary: #7c3aed;
+  --accent-secondary: #db2777;
+}
+
 /* GPU acceleration for smooth animations */
 * {
   -webkit-font-smoothing: antialiased;
@@ -13,8 +32,19 @@
 body {
   width: 100dvw;
   overflow-x: hidden;
-  background-color: #dfdff0;
   font-family: "General Sans", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme-aware body styles */
+:root.dark body {
+  background-color: #0a0a1a;
+  color: #ffffff;
+}
+
+:root.light body {
+  background-color: #f8fafc;
+  color: #1e293b;
 }
 
 @layer base {
@@ -55,12 +85,20 @@ body {
   }
 
   .nav-hover-btn {
-    @apply relative ms-10 cursor-pointer font-general text-xs uppercase text-blue-50 transition-opacity duration-200 hover:opacity-75;
+    @apply relative ms-10 cursor-pointer font-general text-xs uppercase transition-opacity duration-200 hover:opacity-75;
   }
 
   .nav-hover-btn::after {
     content: '';
-    @apply absolute -bottom-0.5 left-0 h-[2px] w-full origin-bottom-right scale-x-0 bg-neutral-800 transition-transform duration-200;
+    @apply absolute -bottom-0.5 left-0 h-[2px] w-full origin-bottom-right scale-x-0 transition-transform duration-200;
+  }
+
+  :root.dark .nav-hover-btn::after {
+    @apply bg-white;
+  }
+
+  :root.light .nav-hover-btn::after {
+    @apply bg-gray-800;
   }
 
   .nav-hover-btn:hover::after {
@@ -68,7 +106,15 @@ body {
   }
 
   .floating-nav {
-    @apply rounded-lg border bg-black;
+    @apply rounded-lg border;
+  }
+
+  :root.dark .floating-nav {
+    @apply bg-black border-white/10;
+  }
+
+  :root.light .floating-nav {
+    @apply bg-white/90 border-gray-200 shadow-lg backdrop-blur-sm;
   }
 
   .absolute-center {
@@ -101,7 +147,15 @@ body {
   }
 
   .animated-title {
-    @apply flex flex-col gap-1 text-7xl uppercase leading-[.8] text-white sm:px-32 md:text-[6rem];
+    @apply flex flex-col gap-1 text-7xl uppercase leading-[.8] sm:px-32 md:text-[6rem];
+  }
+
+  :root.dark .animated-title {
+    @apply text-white;
+  }
+
+  :root.light .animated-title {
+    @apply text-gray-800;
   }
 
   .animated-word {
@@ -172,7 +226,15 @@ body {
 
 /* Optimized indicator animation */
 .indicator-line {
-  @apply h-[4px] w-px rounded-full bg-white transition-all duration-200 ease-in-out;
+  @apply h-[4px] w-px rounded-full transition-all duration-200 ease-in-out;
+}
+
+:root.dark .indicator-line {
+  @apply bg-white;
+}
+
+:root.light .indicator-line {
+  @apply bg-gray-800;
 }
 
 .indicator-line.active {
@@ -249,7 +311,7 @@ body {
 .three-body {
   --uib-size: 35px;
   --uib-speed: 0.8s;
-  --uib-color: #5d3fd3;
+  --uib-color: #8b5cf6;
   position: relative;
   display: inline-block;
   height: var(--uib-size);
@@ -351,6 +413,11 @@ body {
   }
 }
 
+/* Theme transition */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
 
@@ -424,4 +491,14 @@ img {
 /* Optimize video rendering */
 video {
   content-visibility: auto;
+}
+
+/* Google Form iframe styling */
+iframe {
+  border: none !important;
+  background: transparent;
+}
+
+:root.light iframe {
+  background: #ffffff;
 }

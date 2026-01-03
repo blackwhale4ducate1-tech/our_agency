@@ -1,13 +1,13 @@
 import gsap from "gsap";
 import { useCallback, useEffect, useRef, useState, memo } from "react";
-import { FaGithub } from "react-icons/fa";
 import { TiLocationArrow } from "react-icons/ti";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-import { LINKS, NAV_ITEMS } from "@/constants";
+import { NAV_ITEMS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { throttle, getAnimationSettings } from "@/lib/performance";
+import { useTheme } from "@/context/ThemeContext";
 
 // Memoized audio indicator
 const AudioIndicator = memo(({ isActive }: { isActive: boolean }) => (
@@ -27,28 +27,34 @@ const AudioIndicator = memo(({ isActive }: { isActive: boolean }) => (
 AudioIndicator.displayName = "AudioIndicator";
 
 // Memoized nav link
-const NavLink = memo(({ href, label, isRoutedPage, shouldUseRouter }: {
+const NavLink = memo(({ href, label, isRoutedPage, shouldUseRouter, isDark }: {
   href: string;
   label: string;
   isRoutedPage: boolean;
   shouldUseRouter: boolean;
+  isDark: boolean;
 }) => {
+  const linkClass = cn(
+    "nav-hover-btn",
+    isDark ? "text-blue-50" : "text-gray-800"
+  );
+
   if (isRoutedPage) {
     return (
-      <Link to={href} className="nav-hover-btn">
+      <Link to={href} className={linkClass}>
         {label}
       </Link>
     );
   }
   if (shouldUseRouter) {
     return (
-      <Link to={`/${href}`} className="nav-hover-btn">
+      <Link to={`/${href}`} className={linkClass}>
         {label}
       </Link>
     );
   }
   return (
-    <a href={href} className="nav-hover-btn">
+    <a href={href} className={linkClass}>
       {label}
     </a>
   );
@@ -56,11 +62,31 @@ const NavLink = memo(({ href, label, isRoutedPage, shouldUseRouter }: {
 
 NavLink.displayName = "NavLink";
 
+// Theme Toggle Button
+const ThemeToggle = memo(({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) => (
+  <button
+    onClick={onToggle}
+    className={cn(
+      "p-2 rounded-full transition-all duration-300",
+      isDark
+        ? "bg-white/10 hover:bg-white/20 text-yellow-400"
+        : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+    )}
+    title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+    aria-label="Toggle theme"
+  >
+    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+  </button>
+));
+
+ThemeToggle.displayName = "ThemeToggle";
+
 export const Navbar = memo(() => {
   const navContainerRef = useRef<HTMLDivElement>(null);
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const location = useLocation();
   const animSettings = getAnimationSettings();
+  const { isDark, toggleTheme } = useTheme();
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isIndicatorActive, setIsIndicatorActive] = useState(false);
@@ -174,7 +200,10 @@ export const Navbar = memo(() => {
     <>
       <header
         ref={navContainerRef}
-        className="fixed inset-x-0 top-4 z-50 h-16 border-none transition-all duration-300 sm:inset-x-6 will-change-transform"
+        className={cn(
+          "fixed inset-x-0 top-4 z-50 h-16 border-none transition-all duration-300 sm:inset-x-6 will-change-transform",
+          !isDark && "bg-white/80 backdrop-blur-sm rounded-lg shadow-sm"
+        )}
       >
         <div className="absolute top-1/2 w-full -translate-y-1/2">
           <nav className="flex size-full items-center justify-between p-4">
@@ -186,7 +215,7 @@ export const Navbar = memo(() => {
               >
                 <img
                   src="/img/logo.png"
-                  alt="Logo"
+                  alt="4DK Teams Logo"
                   className="w-10"
                   loading="eager"
                   width={40}
@@ -196,7 +225,10 @@ export const Navbar = memo(() => {
 
               <Link
                 to="/products"
-                className="md:flex hidden items-center justify-center gap-1 group relative z-10 w-fit cursor-pointer overflow-hidden rounded-full bg-blue-50 px-7 py-3 text-black transition hover:opacity-75"
+                className={cn(
+                  "md:flex hidden items-center justify-center gap-1 group relative z-10 w-fit cursor-pointer overflow-hidden rounded-full px-7 py-3 transition hover:opacity-75",
+                  isDark ? "bg-blue-50 text-black" : "bg-indigo-600 text-white"
+                )}
               >
                 <span className="relative inline-flex overflow-hidden font-general text-xs uppercase">
                   Products
@@ -215,6 +247,7 @@ export const Navbar = memo(() => {
                     label={label}
                     isRoutedPage={isRoutedPage(label)}
                     shouldUseRouter={shouldUseRouter(href)}
+                    isDark={isDark}
                   />
                 ))}
               </div>
@@ -223,7 +256,10 @@ export const Navbar = memo(() => {
                 {/* Audio Controls */}
                 <button
                   onClick={toggleAudioIndicator}
-                  className="ml-2 md:ml-10 flex items-center space-x-1 p-2 transition hover:opacity-75"
+                  className={cn(
+                    "ml-2 md:ml-10 flex items-center space-x-1 p-2 transition hover:opacity-75",
+                    !isDark && "[&_.indicator-line]:bg-gray-800"
+                  )}
                   title="Play Audio"
                   aria-label="Toggle audio"
                 >
@@ -237,22 +273,16 @@ export const Navbar = memo(() => {
                   <AudioIndicator isActive={isIndicatorActive} />
                 </button>
 
-                {/* GitHub Link */}
-                <a
-                  href={LINKS.sourceCode}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="hidden sm:block transition hover:opacity-75"
-                  title="Source Code"
-                  aria-label="View source code on GitHub"
-                >
-                  <FaGithub className="size-5 text-white" />
-                </a>
+                {/* Theme Toggle */}
+                <ThemeToggle isDark={isDark} onToggle={toggleTheme} />
 
                 {/* Mobile Menu Button */}
                 <button
                   onClick={toggleMobileMenu}
-                  className="md:hidden p-2 text-white hover:text-yellow-400 transition-colors"
+                  className={cn(
+                    "md:hidden p-2 transition-colors",
+                    isDark ? "text-white hover:text-yellow-400" : "text-gray-800 hover:text-indigo-600"
+                  )}
                   title="Toggle Menu"
                   aria-label="Toggle mobile menu"
                   aria-expanded={isMobileMenuOpen}
@@ -273,16 +303,24 @@ export const Navbar = memo(() => {
       {isMobileMenuOpen && (
         <div className="mobile-menu-overlay fixed inset-0 z-40 md:hidden">
           <div
-            className="absolute inset-0 bg-black/50"
+            className={cn(
+              "absolute inset-0",
+              isDark ? "bg-black/50" : "bg-white/50"
+            )}
             onClick={closeMobileMenu}
             aria-hidden="true"
           />
-          <div className="mobile-menu-content absolute top-20 left-4 right-4 bg-black/90 rounded-2xl border border-white/10 p-6 shadow-2xl">
+          <div className={cn(
+            "mobile-menu-content absolute top-20 left-4 right-4 rounded-2xl border p-6 shadow-2xl",
+            isDark
+              ? "bg-black/90 border-white/10"
+              : "bg-white/95 border-gray-200"
+          )}>
             <div className="flex flex-col space-y-4">
               {/* Mobile Products Link */}
               <Link
                 to="/products"
-                className="mobile-menu-item flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 active:scale-95"
+                className="mobile-menu-item flex items-center justify-center gap-2 w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 active:scale-95"
                 onClick={closeMobileMenu}
               >
                 <span>Products</span>
@@ -294,12 +332,19 @@ export const Navbar = memo(() => {
                 const routedPage = isRoutedPage(label);
                 const useRouter = shouldUseRouter(href);
 
+                const linkClass = cn(
+                  "mobile-menu-item block w-full py-3 px-4 rounded-lg transition-all duration-200 text-center font-medium",
+                  isDark
+                    ? "text-white hover:text-yellow-400 hover:bg-white/10"
+                    : "text-gray-800 hover:text-indigo-600 hover:bg-gray-100"
+                );
+
                 if (routedPage) {
                   return (
                     <Link
                       key={href}
                       to={href}
-                      className="mobile-menu-item block w-full text-white hover:text-yellow-400 py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 text-center font-medium"
+                      className={linkClass}
                       onClick={closeMobileMenu}
                     >
                       {label}
@@ -311,7 +356,7 @@ export const Navbar = memo(() => {
                     <Link
                       key={href}
                       to={`/${href}`}
-                      className="mobile-menu-item block w-full text-white hover:text-yellow-400 py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 text-center font-medium"
+                      className={linkClass}
                       onClick={closeMobileMenu}
                     >
                       {label}
@@ -322,7 +367,7 @@ export const Navbar = memo(() => {
                   <a
                     key={href}
                     href={href}
-                    className="mobile-menu-item block w-full text-white hover:text-yellow-400 py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 text-center font-medium"
+                    className={linkClass}
                     onClick={closeMobileMenu}
                   >
                     {label}
@@ -330,17 +375,21 @@ export const Navbar = memo(() => {
                 );
               })}
 
-              {/* Mobile GitHub Link */}
-              <a
-                href={LINKS.sourceCode}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mobile-menu-item flex items-center justify-center gap-2 w-full text-gray-300 hover:text-white py-3 px-4 rounded-lg hover:bg-white/10 transition-all duration-200 font-medium"
-                onClick={closeMobileMenu}
-              >
-                <FaGithub className="w-5 h-5" />
-                <span>Source Code</span>
-              </a>
+              {/* Mobile Theme Toggle */}
+              <div className="mobile-menu-item flex justify-center pt-2">
+                <button
+                  onClick={toggleTheme}
+                  className={cn(
+                    "flex items-center gap-2 px-6 py-3 rounded-full transition-all duration-300",
+                    isDark
+                      ? "bg-white/10 text-yellow-400 hover:bg-white/20"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  )}
+                >
+                  {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

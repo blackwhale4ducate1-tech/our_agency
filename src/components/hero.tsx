@@ -5,14 +5,19 @@ import { useCallback, useEffect, useRef, useState, memo } from "react";
 import { TiLocationArrow } from "react-icons/ti";
 
 import { Button } from "./button";
-import { VIDEO_LINKS } from "@/constants";
+import { VIDEO_LINKS, COMPANY } from "@/constants";
 import { getAnimationSettings, isMobile } from "@/lib/performance";
+import { useTheme } from "@/context/ThemeContext";
+import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
 // Memoized loading spinner to prevent re-renders
-const LoadingSpinner = memo(() => (
-  <div className="flex-center absolute z-[100] h-dvh w-screen overflow-hidden bg-violet-50">
+const LoadingSpinner = memo(({ isDark }: { isDark: boolean }) => (
+  <div className={cn(
+    "flex-center absolute z-[100] h-dvh w-screen overflow-hidden",
+    isDark ? "bg-violet-50" : "bg-gray-100"
+  )}>
     <div className="three-body">
       <div className="three-body__dot" />
       <div className="three-body__dot" />
@@ -37,6 +42,7 @@ export const Hero = memo(() => {
   const totalVideos = 4;
   const upcomingVideoIndex = (currentIndex % totalVideos) + 1;
   const animSettings = getAnimationSettings();
+  const { isDark } = useTheme();
 
   // Check for mobile device on mount
   useEffect(() => {
@@ -149,11 +155,14 @@ export const Hero = memo(() => {
 
   return (
     <section id="hero" className="relative h-dvh w-screen overflow-x-hidden">
-      {isLoading && <LoadingSpinner />}
+      {isLoading && <LoadingSpinner isDark={isDark} />}
 
       <div
         id="video-frame"
-        className="relative z-10 h-dvh w-screen overflow-hidden rounded-lg bg-blue-75"
+        className={cn(
+          "relative z-10 h-dvh w-screen overflow-hidden rounded-lg",
+          isDark ? "bg-blue-75" : "bg-gray-100"
+        )}
       >
         <div>
           {/* Mini video - only show on desktop */}
@@ -208,25 +217,34 @@ export const Hero = memo(() => {
           />
         </div>
 
-        <h1 className="special-font hero-heading absolute bottom-5 right-5 z-40 text-blue-75">
-          Dev<b>e</b>lopment
+        <h1 className={cn(
+          "special-font hero-heading absolute bottom-5 right-5 z-40",
+          isDark ? "text-blue-75" : "text-gray-200"
+        )}>
+          {COMPANY.name.split(' ')[0]}<b>.</b>{COMPANY.name.split(' ')[1] || 'Teams'}
         </h1>
 
         <div className="absolute left-0 top-0 z-40 size-full">
           <div className="mt-24 px-5 sm:px-10">
-            <h1 className="special-font hero-heading text-blue-100">
+            <h1 className={cn(
+              "special-font hero-heading",
+              isDark ? "text-blue-100" : "text-gray-700"
+            )}>
               Innov<b>a</b>tive
             </h1>
 
-            <p className="mb-5 max-w-64 font-robert-regular text-blue-100">
+            <p className={cn(
+              "mb-5 max-w-64 font-robert-regular",
+              isDark ? "text-blue-100" : "text-gray-600"
+            )}>
               Crafting Digital Solutions <br />
-              Building Tomorrow's Technology
+              by {COMPANY.name}
             </p>
 
             <Button
               id="watch-trailer"
               leftIcon={TiLocationArrow}
-              containerClass="bg-yellow-300 flex-center gap-1"
+              containerClass="bg-gradient-to-r from-yellow-400 to-orange-400 flex-center gap-1 text-black"
             >
               Our Portfolio
             </Button>
@@ -234,8 +252,11 @@ export const Hero = memo(() => {
         </div>
       </div>
 
-      <h1 className="special-font hero-heading absolute bottom-5 right-5 text-black">
-        Dev<b>e</b>lopment
+      <h1 className={cn(
+        "special-font hero-heading absolute bottom-5 right-5",
+        isDark ? "text-black" : "text-gray-300"
+      )}>
+        {COMPANY.name.split(' ')[0]}<b>.</b>{COMPANY.name.split(' ')[1] || 'Teams'}
       </h1>
     </section>
   );
