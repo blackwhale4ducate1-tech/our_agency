@@ -1,16 +1,20 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
-import { useCallback, useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import { TiLocationArrow } from "react-icons/ti";
+import { Link } from "react-router-dom";
 
 import { Button } from "./button";
-import { VIDEO_LINKS, COMPANY } from "@/constants";
+import { COMPANY } from "@/constants";
 import { getAnimationSettings, isMobile } from "@/lib/performance";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Local optimized hero video
+const HERO_VIDEO = "/videos/hero-video.mp4";
 
 // Memoized loading spinner to prevent re-renders
 const LoadingSpinner = memo(({ isDark }: { isDark: boolean }) => (
@@ -29,18 +33,11 @@ const LoadingSpinner = memo(({ isDark }: { isDark: boolean }) => (
 LoadingSpinner.displayName = "LoadingSpinner";
 
 export const Hero = memo(() => {
-  const [currentIndex, setCurrentIndex] = useState(1);
-  const [hasClicked, setHasClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadedVideos, setLoadedVideos] = useState(0);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
-  const nextVideoRef = useRef<HTMLVideoElement>(null);
   const mainVideoRef = useRef<HTMLVideoElement>(null);
-  const animationRef = useRef<gsap.core.Timeline | null>(null);
 
-  const totalVideos = 4;
-  const upcomingVideoIndex = (currentIndex % totalVideos) + 1;
   const animSettings = getAnimationSettings();
   const { isDark } = useTheme();
 
@@ -49,83 +46,60 @@ export const Hero = memo(() => {
     setIsMobileDevice(isMobile());
   }, []);
 
-  const VIDEO_KEYS = ["hero1", "hero2", "hero3", "hero4"] as const;
-  const getVideoSrc = useCallback((i: number) => {
-    const key = VIDEO_KEYS[i - 1];
-    return VIDEO_LINKS[key];
-  }, []);
-
-  const handleMiniVideoClick = useCallback(() => {
-    if (!animSettings.shouldAnimate) return;
-    setHasClicked(true);
-    setCurrentIndex(upcomingVideoIndex);
-  }, [upcomingVideoIndex, animSettings.shouldAnimate]);
-
-  const handleVideoLoad = useCallback(() => {
-    setLoadedVideos((prev) => prev + 1);
-  }, []);
-
-  // Optimized loading check
-  useEffect(() => {
-    if (loadedVideos >= 1) {
-      // Only wait for first video to load
-      const timer = setTimeout(() => setIsLoading(false), 500);
-      return () => clearTimeout(timer);
+  // Handle video loaded
+  const handleVideoLoad = () => {
+    setIsLoading(false);
+    // Auto-play with sound when loaded
+    if (mainVideoRef.current) {
+      mainVideoRef.current.play().catch(() => {
+        // If autoplay with sound fails (browser policy), try muted first
+        if (mainVideoRef.current) {
+          mainVideoRef.current.muted = true;
+          mainVideoRef.current.play();
+        }
+      });
     }
-  }, [loadedVideos]);
+  };
 
-  // Pause videos when tab is not visible
+  // Keep video always playing - never pause
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        mainVideoRef.current?.pause();
-        nextVideoRef.current?.pause();
-      } else if (!isLoading) {
-        mainVideoRef.current?.play().catch(() => { });
+    const video = mainVideoRef.current;
+    if (!video) return;
+
+    // Function to ensure video keeps playing
+    const keepPlaying = () => {
+      if (video.paused) {
+        video.play().catch(() => { });
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isLoading]);
+    // Check every second to ensure video is playing
+    const interval = setInterval(keepPlaying, 1000);
 
-  useGSAP(
-    () => {
-      if (!animSettings.shouldAnimate) return;
-
-      if (hasClicked) {
-        // Kill previous animation if exists
-        animationRef.current?.kill();
-
-        gsap.set("#next-video", { visibility: "visible" });
-
-        animationRef.current = gsap.timeline();
-        animationRef.current
-          .to("#next-video", {
-            transformOrigin: "center center",
-            scale: 1,
-            width: "100%",
-            height: "100%",
-            duration: 0.8, // Reduced duration
-            ease: "power1.inOut",
-            onStart: () => {
-              void nextVideoRef.current?.play();
-            },
-          })
-          .from(
-            "#current-video",
-            {
-              transformOrigin: "center center",
-              scale: 0,
-              duration: 1.2, // Reduced
-              ease: "power1.inOut",
-            },
-            "<"
-          );
+    // Also restart on visibility change
+    const handleVisibilityChange = () => {
+      if (!document.hidden && video.paused) {
+        video.play().catch(() => { });
       }
-    },
-    { dependencies: [currentIndex], revertOnUpdate: true }
-  );
+    };
+
+    // Handle video ended - restart it
+    const handleEnded = () => {
+      video.currentTime = 0;
+      video.play().catch(() => { });
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("pause", keepPlaying);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("pause", keepPlaying);
+    };
+  }, [isLoading]);
 
   useGSAP(() => {
     if (!animSettings.shouldAnimate) return;
@@ -139,7 +113,7 @@ export const Hero = memo(() => {
       trigger: "#video-frame",
       start: "center center",
       end: "bottom center",
-      scrub: 0.5, // Added scrub value for smoother animation
+      scrub: 0.5,
       onUpdate: (self) => {
         const progress = self.progress;
         const clipPath = `polygon(${14 - 14 * progress}% 0%, ${72 + 28 * progress}% 0%, ${90 + 10 * progress}% ${90 + 10 * progress}%, 0% 100%)`;
@@ -164,99 +138,118 @@ export const Hero = memo(() => {
           isDark ? "bg-blue-75" : "bg-gray-100"
         )}
       >
-        <div>
-          {/* Mini video - only show on desktop */}
-          {!isMobileDevice && animSettings.enableHoverEffects && (
-            <div className="mask-clip-path absolute-center absolute z-50 size-64 cursor-pointer overflow-hidden rounded-lg">
-              <div
-                onClick={handleMiniVideoClick}
-                className="origin-center scale-50 opacity-0 transition-all duration-500 ease-in hover:scale-100 hover:opacity-100"
-              >
-                <video
-                  ref={nextVideoRef}
-                  src={getVideoSrc(upcomingVideoIndex)}
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  id="current-video"
-                  className="size-64 origin-center scale-150 object-cover object-center"
-                  onLoadedData={handleVideoLoad}
-                />
-              </div>
-            </div>
-          )}
+        {/* Gradient overlay for better text readability */}
+        <div className={cn(
+          "absolute inset-0 z-10",
+          isDark
+            ? "bg-gradient-to-b from-black/40 via-transparent to-black/60"
+            : "bg-gradient-to-b from-white/30 via-transparent to-white/40"
+        )} />
 
-          {/* Next video - only on desktop */}
-          {!isMobileDevice && (
-            <video
-              ref={nextVideoRef}
-              src={getVideoSrc(currentIndex)}
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              id="next-video"
-              className="absolute-center invisible absolute z-20 size-64 object-cover object-center"
-              onLoadedData={handleVideoLoad}
-            />
-          )}
+        {/* Main hero video - WITH SOUND, ALWAYS PLAYING */}
+        <video
+          ref={mainVideoRef}
+          src={HERO_VIDEO}
+          autoPlay
+          loop
+          playsInline
+          preload="auto"
+          className="absolute left-0 top-0 size-full object-cover object-center"
+          onLoadedData={handleVideoLoad}
+        />
 
-          {/* Main video */}
-          <video
-            ref={mainVideoRef}
-            src={getVideoSrc(currentIndex === totalVideos - 1 ? 1 : currentIndex)}
-            autoPlay={animSettings.enableVideoAutoplay}
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="absolute left-0 top-0 size-full object-cover object-center"
-            onLoadedData={handleVideoLoad}
-            poster="/img/hero-poster.webp"
-          />
-        </div>
-
+        {/* Company name watermark at bottom */}
         <h1 className={cn(
           "special-font hero-heading absolute bottom-5 right-5 z-40",
-          isDark ? "text-blue-75" : "text-gray-200"
+          isDark ? "text-blue-75" : "text-white/80"
         )}>
-          {COMPANY.name.split(' ')[0]}<b>.</b>{COMPANY.name.split(' ')[1] || 'Teams'}
+          4DK<b>.</b>Teams
         </h1>
 
+        {/* Main hero content */}
         <div className="absolute left-0 top-0 z-40 size-full">
           <div className="mt-24 px-5 sm:px-10">
-            <h1 className={cn(
-              "special-font hero-heading",
-              isDark ? "text-blue-100" : "text-gray-700"
+            {/* Badge */}
+            <div className={cn(
+              "mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm",
+              isDark
+                ? "bg-white/10 border-white/20"
+                : "bg-black/10 border-white/30"
             )}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-sm font-medium text-white">Available for Projects</span>
+            </div>
+
+            <h1 className="special-font hero-heading text-white drop-shadow-lg">
               Innov<b>a</b>tive
             </h1>
 
-            <p className={cn(
-              "mb-5 max-w-64 font-robert-regular",
-              isDark ? "text-blue-100" : "text-gray-600"
-            )}>
-              Crafting Digital Solutions <br />
-              by {COMPANY.name}
+            <h2 className="special-font text-4xl md:text-6xl font-bold mt-2 mb-4 text-white drop-shadow-lg">
+              Digital Solutions
+            </h2>
+
+            <p className="mb-6 max-w-md font-robert-regular text-lg leading-relaxed text-white/90 drop-shadow-md">
+              Transforming ideas into powerful digital experiences.
+              Web development, mobile apps, and AI-powered solutions by {COMPANY.name}.
             </p>
 
-            <Button
-              id="watch-trailer"
-              leftIcon={TiLocationArrow}
-              containerClass="bg-gradient-to-r from-yellow-400 to-orange-400 flex-center gap-1 text-black"
-            >
-              Our Portfolio
-            </Button>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/contact">
+                <Button
+                  id="get-started"
+                  leftIcon={TiLocationArrow}
+                  containerClass="bg-gradient-to-r from-yellow-400 to-orange-400 flex-center gap-1 text-black hover:shadow-2xl hover:shadow-yellow-500/30 transition-all"
+                >
+                  Get Started
+                </Button>
+              </Link>
+              <Link to="/services">
+                <Button
+                  id="view-services"
+                  containerClass="border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
+                >
+                  View Services
+                </Button>
+              </Link>
+            </div>
+
+            {/* Stats row */}
+            {!isMobileDevice && (
+              <div className="mt-12 flex items-center gap-8">
+                {[
+                  { value: "50+", label: "Projects" },
+                  { value: "99%", label: "Satisfaction" },
+                  { value: "10+", label: "Years" }
+                ].map((stat, i) => (
+                  <div key={i} className="text-center">
+                    <div className="text-3xl font-bold text-white drop-shadow-lg">{stat.value}</div>
+                    <div className="text-sm text-white/70">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 animate-bounce">
+          <span className="text-white/60 text-sm">Scroll to explore</span>
+          <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
         </div>
       </div>
 
+      {/* Background company name */}
       <h1 className={cn(
         "special-font hero-heading absolute bottom-5 right-5",
         isDark ? "text-black" : "text-gray-300"
       )}>
-        {COMPANY.name.split(' ')[0]}<b>.</b>{COMPANY.name.split(' ')[1] || 'Teams'}
+        4DK<b>.</b>Teams
       </h1>
     </section>
   );
