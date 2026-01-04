@@ -11,9 +11,8 @@ import { AnimatedTitle } from "./animated-title";
 import { getAnimationSettings } from "@/lib/performance";
 import { useTheme } from "@/context/ThemeContext";
 import { cn, Wrapper } from "@/lib/utils";
-import { COMPANY } from "@/constants";
 import { hash } from "@/lib/utils";
-import { Link } from "react-router-dom";
+
 
 gsap.registerPlugin(ScrollTrigger);
 
