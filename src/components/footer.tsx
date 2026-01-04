@@ -3,6 +3,7 @@ import { SOCIAL_LINKS, COMPANY } from "@/constants";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
 import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { Logo4DK } from "./navbar";
 
 export const Footer = () => {
   const { isDark } = useTheme();
@@ -33,12 +34,7 @@ export const Footer = () => {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <span
-                className="text-3xl font-black tracking-tight bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent font-serif italic"
-              >
-                4DK
-              </span>
-              <span className="text-2xl font-bold text-white ml-1">.Teams</span>
+              <Logo4DK isDark={false}/>
             </div>
             <p className="text-sm leading-relaxed opacity-80">
               {COMPANY.name} - Your trusted partner for innovative web development,

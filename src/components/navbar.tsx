@@ -8,7 +8,29 @@ import { NAV_ITEMS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { throttle, getAnimationSettings } from "@/lib/performance";
 import { useTheme } from "@/context/ThemeContext";
+const logo = "/img/logo.png"
+// Stylish 4DK Logo Component
+export const Logo4DK = memo(({ isDark }: { isDark: boolean }) => (
+  <div className="flex items-center">
+    <div
+      className={cn(
+        "flex justify-center items-center",
+        "text-3xl font-black tracking-tight",
+        "bg-black rounded-full",
+        "font-serif italic",
+        "w-14 h-14 flex items-center justify-center"
+      )}
+      style={{
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        textShadow: isDark ? '0 0 30px rgba(139, 92, 246, 0.3)' : 'none'
+      }}
+    >
+     <img className={cn("w-12 h-12 object-contain rounded-full")} src={logo}/>
+    </div>
+  </div>
+));
 
+Logo4DK.displayName = "Logo4DK";
 // Memoized audio indicator
 const AudioIndicator = memo(({ isActive }: { isActive: boolean }) => (
   <>
@@ -25,27 +47,6 @@ const AudioIndicator = memo(({ isActive }: { isActive: boolean }) => (
 ));
 
 AudioIndicator.displayName = "AudioIndicator";
-
-// Stylish 4DK Logo Component
-const Logo4DK = memo(({ isDark }: { isDark: boolean }) => (
-  <div className="flex items-center">
-    <span
-      className={cn(
-        "text-3xl font-black tracking-tight",
-        "bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent",
-        "font-serif italic"
-      )}
-      style={{
-        fontFamily: "'Georgia', 'Times New Roman', serif",
-        textShadow: isDark ? '0 0 30px rgba(139, 92, 246, 0.3)' : 'none'
-      }}
-    >
-      4DK
-    </span>
-  </div>
-));
-
-Logo4DK.displayName = "Logo4DK";
 
 // Memoized nav link
 const NavLink = memo(({ href, label, isRoutedPage, shouldUseRouter, isDark }: {

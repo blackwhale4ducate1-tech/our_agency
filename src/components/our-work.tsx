@@ -6,6 +6,7 @@ import { ExternalLink, Play, Award, Zap, Users, Globe } from "lucide-react";
 import { getAnimationSettings, isMobile } from "@/lib/performance";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
@@ -25,9 +26,9 @@ const projects = [
   {
     id: 2,
     title: "BLS Trading",
-    description: "Professional trading platform with comprehensive business solutions and international trade services",
+    description: "Professional FMCG Selling site with comprehensive business solutions and international trade services at Dubai",
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop&q=75",
-    tech: ["React", "Node.js", "Trading", "B2B"],
+    tech: ["React", "Node.js", "Trading", "B2B","SEO"],
     category: "Trading",
     stats: { users: "10K+", performance: "99.8%", awards: "2" },
     color: "from-blue-500 to-indigo-500",
@@ -44,42 +45,6 @@ const projects = [
     stats: { users: "2M+", performance: "99.9%", awards: "5" },
     color: "from-purple-500 to-pink-500",
     bgColor: "from-purple-900/20 to-pink-900/20",
-    liveUrl: "#"
-  },
-  {
-    id: 4,
-    title: "HealthCare AI",
-    description: "Revolutionary healthcare management system with predictive analytics and patient care optimization",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800&h=600&fit=crop&q=75",
-    tech: ["Vue.js", "Python", "TensorFlow", "IoT"],
-    category: "Healthcare",
-    stats: { users: "500K+", performance: "99.8%", awards: "3" },
-    color: "from-emerald-500 to-teal-500",
-    bgColor: "from-emerald-900/20 to-teal-900/20",
-    liveUrl: "#"
-  },
-  {
-    id: 5,
-    title: "Smart Commerce",
-    description: "Intelligent e-commerce platform with AR/VR integration and personalized shopping experiences",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop&q=75",
-    tech: ["Next.js", "AR/VR", "WebGL", "Stripe"],
-    category: "E-Commerce",
-    stats: { users: "1.5M+", performance: "99.7%", awards: "4" },
-    color: "from-cyan-500 to-blue-500",
-    bgColor: "from-cyan-900/20 to-blue-900/20",
-    liveUrl: "#"
-  },
-  {
-    id: 6,
-    title: "Neural Network Hub",
-    description: "Advanced AI platform for machine learning model deployment and real-time data processing",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop&q=75",
-    tech: ["Python", "TensorFlow", "Kubernetes", "GraphQL"],
-    category: "AI/ML",
-    stats: { users: "100K+", performance: "99.9%", awards: "6" },
-    color: "from-orange-500 to-red-500",
-    bgColor: "from-orange-900/20 to-red-900/20",
     liveUrl: "#"
   }
 ];
@@ -393,9 +358,9 @@ export const OurWork = memo(() => {
             )}>
               Ready to Create Something Amazing?
             </h3>
-            <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-transform duration-200 active:scale-95 shadow-xl">
+            <Link to="/contact" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-10 py-3.5 rounded-full font-bold text-lg transition-transform duration-200 active:scale-95 shadow-xl">
               Start Your Project
-            </button>
+            </Link>
           </div>
         </div>
       </div>

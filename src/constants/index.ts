@@ -14,9 +14,9 @@ export const NAV_ITEMS = [
 export const COMPANY = {
   name: "4DK Teams",
   tagline: "Innovative Digital Solutions",
-  email: "contact@4dkteams.com",
-  phone: "+91 98765 43210",
-  address: "Chennai, Tamil Nadu, India",
+  email: "support@4dk.in",
+  phone: "+91 7550384817",
+  address: "Madurai, Tamil Nadu, India",
 } as const;
 
 // Google Form URLs - Contact form with name, email, message, and company fields
