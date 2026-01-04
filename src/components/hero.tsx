@@ -1,17 +1,12 @@
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/all";
 import { useEffect, useRef, useState, memo } from "react";
 import { TiLocationArrow } from "react-icons/ti";
 import { Link } from "react-router-dom";
 
 import { Button } from "./button";
 import { COMPANY } from "@/constants";
-import { getAnimationSettings, isMobile } from "@/lib/performance";
+import { isMobile } from "@/lib/performance";
 import { useTheme } from "@/context/ThemeContext";
 import { cn } from "@/lib/utils";
-
-gsap.registerPlugin(ScrollTrigger);
 
 // Local optimized hero video
 const HERO_VIDEO = "/videos/hero-video.mp4";
@@ -38,7 +33,6 @@ export const Hero = memo(() => {
 
   const mainVideoRef = useRef<HTMLVideoElement>(null);
 
-  const animSettings = getAnimationSettings();
   const { isDark } = useTheme();
 
   // Check for mobile device on mount
@@ -101,156 +95,113 @@ export const Hero = memo(() => {
     };
   }, [isLoading]);
 
-  useGSAP(() => {
-    if (!animSettings.shouldAnimate) return;
-
-    gsap.set("#video-frame", {
-      clipPath: "polygon(14% 0%, 72% 0%, 90% 90%, 0% 100%)",
-      borderRadius: "0 0 40% 10%",
-    });
-
-    ScrollTrigger.create({
-      trigger: "#video-frame",
-      start: "center center",
-      end: "bottom center",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const progress = self.progress;
-        const clipPath = `polygon(${14 - 14 * progress}% 0%, ${72 + 28 * progress}% 0%, ${90 + 10 * progress}% ${90 + 10 * progress}%, 0% 100%)`;
-        const borderRadius = `0 0 ${40 - 40 * progress}% ${10 - 10 * progress}%`;
-        gsap.set("#video-frame", { clipPath, borderRadius });
-      },
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-    };
-  });
-
   return (
-    <section id="hero" className="relative h-dvh w-screen overflow-x-hidden">
+    <section id="hero" className="relative h-screen w-screen overflow-hidden">
       {isLoading && <LoadingSpinner isDark={isDark} />}
 
-      <div
-        id="video-frame"
-        className={cn(
-          "relative z-10 h-dvh w-screen overflow-hidden rounded-lg",
-          isDark ? "bg-blue-75" : "bg-gray-100"
-        )}
-      >
-        {/* Gradient overlay for better text readability */}
-        <div className={cn(
-          "absolute inset-0 z-10",
-          isDark
-            ? "bg-gradient-to-b from-black/40 via-transparent to-black/60"
-            : "bg-gradient-to-b from-white/30 via-transparent to-white/40"
-        )} />
-
-        {/* Main hero video - WITH SOUND, ALWAYS PLAYING */}
+      {/* Full Screen Video Container */}
+      <div className="absolute inset-0 w-full h-full">
+        {/* Main hero video - FULL SCREEN, WITH SOUND, ALWAYS PLAYING */}
         <video
           ref={mainVideoRef}
           src={HERO_VIDEO}
           autoPlay
           loop
           playsInline
+          muted
           preload="auto"
-          className="absolute left-0 top-0 size-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover"
           onLoadedData={handleVideoLoad}
         />
 
-        {/* Company name watermark at bottom */}
-        <h1 className={cn(
-          "special-font hero-heading absolute bottom-5 right-5 z-40",
-          isDark ? "text-blue-75" : "text-white/80"
-        )}>
-          4DK<b>.</b>Teams
-        </h1>
+        {/* Dark overlay for better text readability */}
+        <div className={cn(
+          "absolute inset-0 z-10",
+          isDark
+            ? "bg-gradient-to-b from-black/50 via-black/20 to-black/70"
+            : "bg-gradient-to-b from-black/40 via-black/10 to-black/60"
+        )} />
+      </div>
 
-        {/* Main hero content */}
-        <div className="absolute left-0 top-0 z-40 size-full">
-          <div className="mt-24 px-5 sm:px-10">
-            {/* Badge */}
-            <div className={cn(
-              "mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm",
-              isDark
-                ? "bg-white/10 border-white/20"
-                : "bg-black/10 border-white/30"
-            )}>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span className="text-sm font-medium text-white">Available for Projects</span>
-            </div>
-
-            <h1 className="special-font hero-heading text-white drop-shadow-lg">
-              Innov<b>a</b>tive
-            </h1>
-
-            <h2 className="special-font text-4xl md:text-6xl font-bold mt-2 mb-4 text-white drop-shadow-lg">
-              Digital Solutions
-            </h2>
-
-            <p className="mb-6 max-w-md font-robert-regular text-lg leading-relaxed text-white/90 drop-shadow-md">
-              Transforming ideas into powerful digital experiences.
-              Web development, mobile apps, and AI-powered solutions by {COMPANY.name}.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/contact">
-                <Button
-                  id="get-started"
-                  leftIcon={TiLocationArrow}
-                  containerClass="bg-gradient-to-r from-yellow-400 to-orange-400 flex-center gap-1 text-black hover:shadow-2xl hover:shadow-yellow-500/30 transition-all"
-                >
-                  Get Started
-                </Button>
-              </Link>
-              <Link to="/services">
-                <Button
-                  id="view-services"
-                  containerClass="border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 transition-all"
-                >
-                  View Services
-                </Button>
-              </Link>
-            </div>
-
-            {/* Stats row */}
-            {!isMobileDevice && (
-              <div className="mt-12 flex items-center gap-8">
-                {[
-                  { value: "50+", label: "Projects" },
-                  { value: "99%", label: "Satisfaction" },
-                  { value: "10+", label: "Years" }
-                ].map((stat, i) => (
-                  <div key={i} className="text-center">
-                    <div className="text-3xl font-bold text-white drop-shadow-lg">{stat.value}</div>
-                    <div className="text-sm text-white/70">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* Hero Content - Overlay */}
+      <div className="relative z-20 h-full w-full flex flex-col justify-center">
+        <div className="container mx-auto px-6 sm:px-10 lg:px-16">
+          {/* Badge */}
+          <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm bg-white/10 border-white/20">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-medium text-white">Available for Projects</span>
           </div>
-        </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-white/60 text-sm">Scroll to explore</span>
-          <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
+          {/* Main Heading */}
+          <h1 className="special-font hero-heading text-white drop-shadow-2xl">
+            Innov<b>a</b>tive
+          </h1>
+
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mt-2 mb-6 text-white drop-shadow-xl">
+            Digital Solutions
+          </h2>
+
+          <p className="mb-8 max-w-xl font-robert-regular text-lg md:text-xl leading-relaxed text-white/90 drop-shadow-lg">
+            Transforming ideas into powerful digital experiences.
+            Web development, mobile apps, and AI-powered solutions by {COMPANY.name}.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <Link to="/contact">
+              <Button
+                id="get-started"
+                leftIcon={TiLocationArrow}
+                containerClass="bg-gradient-to-r from-yellow-400 to-orange-400 flex-center gap-1 text-black font-bold hover:shadow-2xl hover:shadow-yellow-500/30 transition-all px-8 py-4"
+              >
+                Get Started
+              </Button>
+            </Link>
+            <Link to="/services">
+              <Button
+                id="view-services"
+                containerClass="border-2 border-white/40 bg-white/10 backdrop-blur-sm text-white font-semibold hover:bg-white/20 transition-all px-8 py-4"
+              >
+                View Services
+              </Button>
+            </Link>
+          </div>
+
+          {/* Stats row */}
+          {!isMobileDevice && (
+            <div className="flex items-center gap-10">
+              {[
+                { value: "50+", label: "Projects Delivered" },
+                { value: "99%", label: "Client Satisfaction" },
+                { value: "10+", label: "Years Experience" }
+              ].map((stat, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-4xl md:text-5xl font-black text-white drop-shadow-xl">{stat.value}</div>
+                  <div className="text-sm text-white/70 mt-1">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Background company name */}
-      <h1 className={cn(
-        "special-font hero-heading absolute bottom-5 right-5",
-        isDark ? "text-black" : "text-gray-300"
-      )}>
-        4DK<b>.</b>Teams
-      </h1>
+      {/* Company name watermark - bottom right */}
+      <div className="absolute bottom-8 right-8 z-30">
+        <h1 className="text-6xl md:text-8xl font-black text-white/20 tracking-tight">
+          4DK<span className="text-yellow-400/30">.</span>Teams
+        </h1>
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 animate-bounce">
+        <span className="text-white/60 text-sm font-medium">Scroll to explore</span>
+        <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </div>
     </section>
   );
 });
