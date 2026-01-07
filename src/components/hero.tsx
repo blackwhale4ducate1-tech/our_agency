@@ -176,7 +176,7 @@ export const Hero = memo(() => {
               {[
                 { value: "50+", label: "Projects Delivered" },
                 { value: "99%", label: "Client Satisfaction" },
-                { value: "10+", label: "Years Experience" }
+                { value: "3+", label: "Years Experience" }
               ].map((stat, i) => (
                 <div key={i} className="text-center">
                   <div className="text-4xl md:text-5xl font-black text-white drop-shadow-xl">{stat.value}</div>

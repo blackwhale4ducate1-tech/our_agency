@@ -187,7 +187,7 @@ const ProjectCard = memo(({
             className={`flex-1 bg-gradient-to-r ${project.color} text-white py-2.5 px-3 rounded-xl font-semibold transition-transform duration-200 active:scale-95 shadow-lg flex items-center justify-center gap-2 text-sm`}
           >
             <Play className="w-4 h-4" />
-            Demo
+            Live View
           </button>
           <button
             onClick={handleVisitSite}

@@ -14,7 +14,7 @@ const teamMembers = [
     id: 1,
     name: "ARUN",
     role: "Founder",
-    image: "img/Founder.jpg",
+    image: "img/Founder.jpeg",
     bio: "Visionary leader with 10+ years in the tech industry, passionate about creating innovative digital solutions.",
     icon: Rocket,
     positionX:"0px",
