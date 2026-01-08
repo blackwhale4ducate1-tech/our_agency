@@ -79,28 +79,33 @@ const tiers = [
 
 const PricingPage = memo(() => {
   const [activeSection, setActiveSection] = useState(0);
-  const heroRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<HTMLDivElement[]>([]);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const { isDark } = useTheme();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
-
-      sectionRefs.current.forEach((section, index) => {
-        if (section) {
-          const { offsetTop, offsetHeight } = section;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(index);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = sectionRefs.current.indexOf(entry.target as HTMLElement);
+            if (index !== -1) {
+              setActiveSection(index);
+            }
           }
-        }
-      });
-    };
+        });
+      },
+      {
+        root: null,
+        rootMargin: "-20% 0px -20% 0px", // Detect when the section is mostly in view
+        threshold: 0.2, // Lower threshold for mobile
+      }
+    );
 
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
+    sectionRefs.current.forEach((section) => {
+      if (section) observer.observe(section);
+    });
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => observer.disconnect();
   }, []);
 
   const scrollToSection = (index: number) => {
@@ -109,72 +114,75 @@ const PricingPage = memo(() => {
 
   return (
     <div className={cn(
-      "min-h-screen w-full overflow-x-hidden",
+      "min-h-screen w-full overflow-x-hidden transition-colors duration-300",
       isDark ? "bg-black text-white" : "bg-gray-50 text-gray-800"
     )}>
       {/* Hero Section */}
       <section
-        ref={heroRef}
-        className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20"
+        ref={(el) => { sectionRefs.current[0] = el }}
+        className="relative min-h-[90dvh] flex flex-col items-center justify-center px-4 py-24 sm:py-32 overflow-hidden"
       >
         {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={cn(
-            "absolute inset-0",
+            "absolute inset-0 transition-opacity duration-500",
             isDark
-              ? "bg-gradient-to-br from-purple-900/30 via-blue-900/20 to-emerald-900/20"
-              : "bg-gradient-to-br from-purple-100/40 via-blue-100/30 to-emerald-100/30"
+              ? "bg-gradient-to-br from-purple-900/20 via-blue-900/10 to-emerald-900/10 opacity-60"
+              : "bg-gradient-to-br from-purple-100/40 via-blue-100/30 to-emerald-100/30 opacity-80"
           )} />
           <div className={cn(
-            "absolute top-1/4 left-1/4 h-96 w-96 rounded-full blur-3xl animate-pulse",
-            isDark ? "bg-purple-500/20" : "bg-purple-300/30"
+            "absolute top-1/4 left-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full blur-[100px] animate-pulse",
+            isDark ? "bg-purple-500/10" : "bg-purple-300/20"
           )} style={{ animationDuration: '4s' }} />
           <div className={cn(
-            "absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full blur-3xl animate-pulse",
-            isDark ? "bg-blue-500/20" : "bg-blue-300/30"
+            "absolute bottom-1/4 right-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full blur-[100px] animate-pulse",
+            isDark ? "bg-blue-500/10" : "bg-blue-300/20"
           )} style={{ animationDuration: '5s', animationDelay: '1s' }} />
         </div>
 
-        <div className="relative z-10 text-center max-w-5xl mx-auto animate-fade-in">
+        <div className="relative z-10 text-center max-w-5xl mx-auto animate-fade-in px-4">
           <div className={cn(
-            "inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-8",
+            "inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border mb-6 md:mb-8",
             isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
           )}>
-            <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span className={isDark ? "text-sm text-gray-300" : "text-sm text-gray-600"}>
+            <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-400" />
+            <span className={cn(
+              "text-xs md:text-sm font-medium",
+              isDark ? "text-gray-300" : "text-gray-600"
+            )}>
               Transparent Pricing, No Hidden Fees
             </span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tight mb-6">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tight mb-6">
             <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
               Simple Pricing
             </span>
           </h1>
 
           <p className={cn(
-            "text-xl md:text-3xl mb-4 max-w-3xl mx-auto",
+            "text-lg sm:text-xl md:text-3xl mb-4 max-w-3xl mx-auto leading-relaxed",
             isDark ? "text-gray-300" : "text-gray-600"
           )}>
             Choose the perfect plan for your needs with {COMPANY.name}
           </p>
 
           <p className={cn(
-            "text-base md:text-lg mb-12 max-w-2xl mx-auto",
+            "text-sm sm:text-base md:text-lg mb-10 max-w-2xl mx-auto font-light leading-relaxed",
             isDark ? "text-gray-400" : "text-gray-500"
           )}>
             Clear pricing with no setup fees or hidden charges. All plans include our core features with transparent cost breakdown.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 px-4 w-full sm:w-auto">
             <button
-              onClick={() => scrollToSection(0)}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-4 px-8 rounded-full text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50"
+              onClick={() => scrollToSection(1)}
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold py-3.5 px-8 rounded-full text-base sm:text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/50"
             >
               View Plans
             </button>
             <button className={cn(
-              "border-2 font-semibold py-4 px-8 rounded-full text-lg transition-all",
+              "w-full sm:w-auto border py-3.5 px-8 rounded-full text-base sm:text-lg font-semibold transition-all",
               isDark
                 ? "border-white/20 hover:border-white/40 text-white hover:bg-white/5"
                 : "border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-100"
@@ -185,7 +193,7 @@ const PricingPage = memo(() => {
 
           <div className="animate-bounce">
             <ChevronDown className={cn(
-              "w-8 h-8 mx-auto",
+              "w-6 h-6 sm:w-8 sm:h-8 mx-auto",
               isDark ? "text-white/50" : "text-gray-400"
             )} />
           </div>
@@ -193,197 +201,185 @@ const PricingPage = memo(() => {
       </section>
 
       {/* Tier Sections */}
-      {tiers.map((tier, index) => (
-        <section
-          key={tier.id}
-          ref={(el) => {
-            if (el) sectionRefs.current[index] = el as HTMLDivElement;
-          }}
-          className="relative min-h-screen flex items-center justify-center px-6 py-20"
-          style={{
-            opacity: activeSection === index ? 1 : 0.3,
-            transform: activeSection === index ? 'scale(1)' : 'scale(0.95)',
-            transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
-          }}
-        >
-          {/* Background Effects */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div
-              className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-gradient-to-r ${tier.accent} opacity-10 blur-3xl`}
-              style={{
-                transform: `translate(-50%, -50%) scale(${activeSection === index ? 1.2 : 0.8})`,
-                transition: 'transform 1s ease-out'
-              }}
-            />
-          </div>
-
-          <div className="relative z-10 max-w-6xl mx-auto w-full">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left Content */}
+      <div className="flex flex-col gap-20 md:gap-32 py-20 overflow-hidden">
+        {tiers.map((tier, index) => (
+          <section
+            key={tier.id}
+            ref={(el) => { sectionRefs.current[index + 1] = el }}
+            className={`relative min-h-[50vh] flex items-center justify-center px-4 md:px-6 transition-all duration-700 ${activeSection === index + 1 ? 'opacity-100 translate-y-0' : 'opacity-40 translate-y-12'
+              }`}
+          >
+            {/* Background Effects */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div
-                className="space-y-6"
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] md:h-[600px] md:w-[600px] rounded-full bg-gradient-to-r ${tier.accent} opacity-10 blur-3xl`}
                 style={{
-                  opacity: activeSection === index ? 1 : 0,
-                  transform: `translateX(${activeSection === index ? '0' : '-100px'})`,
-                  transition: 'all 1s cubic-bezier(0.4, 0, 0.2, 1)'
+                  transform: `translate(-50%, -50%) scale(${activeSection === index + 1 ? 1.2 : 0.8})`,
+                  transition: 'transform 1s ease-out'
                 }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${tier.accent}`}>
-                    <tier.icon className="w-8 h-8 text-white" />
+              />
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto w-full">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                {/* Left Content */}
+                <div
+                  className="space-y-6 md:space-y-8 text-center lg:text-left"
+                >
+                  <div className="flex flex-col lg:flex-row items-center lg:items-start gap-4">
+                    <div className={`p-3 rounded-2xl bg-gradient-to-r ${tier.accent} shadow-lg shadow-${tier.accentSolid}/20`}>
+                      <tier.icon className="w-8 h-8 text-white" />
+                    </div>
+                    {tier.popular && (
+                      <span className="px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider bg-gradient-to-r from-yellow-400 to-orange-500 text-black flex items-center gap-1 shadow-lg shadow-yellow-500/20">
+                        <Star className="w-3 h-3 md:w-4 md:h-4" fill="currentColor" />
+                        Most Popular
+                      </span>
+                    )}
                   </div>
-                  {tier.popular && (
-                    <span className="px-4 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-yellow-400 to-orange-500 text-black flex items-center gap-1">
-                      <Star className="w-4 h-4" fill="currentColor" />
-                      Most Popular
-                    </span>
-                  )}
-                </div>
 
-                <div>
-                  <h2 className={`text-6xl md:text-7xl font-extrabold bg-gradient-to-r ${tier.accent} bg-clip-text text-transparent mb-2`}>
-                    {tier.name}
-                  </h2>
-                  <p className={isDark ? "text-2xl text-gray-400" : "text-2xl text-gray-500"}>
-                    {tier.tagline}
+                  <div>
+                    <h2 className={`text-4xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r ${tier.accent} bg-clip-text text-transparent mb-2`}>
+                      {tier.name}
+                    </h2>
+                    <p className={cn(
+                      "text-xl md:text-2xl",
+                      isDark ? "text-gray-400" : "text-gray-500"
+                    )}>
+                      {tier.tagline}
+                    </p>
+                  </div>
+
+                  <p className={cn(
+                    "text-base md:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0",
+                    isDark ? "text-gray-300" : "text-gray-600"
+                  )}>
+                    {tier.description}
                   </p>
-                </div>
 
-                <p className={cn(
-                  "text-lg leading-relaxed",
-                  isDark ? "text-gray-300" : "text-gray-600"
-                )}>
-                  {tier.description}
-                </p>
-
-                <div className="flex items-end gap-2">
-                  <span className={`text-7xl font-extrabold bg-gradient-to-r ${tier.accent} bg-clip-text text-transparent`}>
-                    {tier.price}
-                  </span>
-                  <span className={cn(
-                    "text-2xl mb-2",
-                    isDark ? "text-gray-400" : "text-gray-500"
-                  )}>{tier.period}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {tier.highlights.map((highlight) => (
-                    <span
-                      key={highlight}
-                      className={cn(
-                        "px-4 py-2 rounded-full text-sm font-medium border",
-                        isDark ? "border-white/20 bg-white/5" : "border-gray-200 bg-white"
-                      )}
-                    >
-                      {highlight}
+                  <div className="flex flex-col lg:flex-row items-center lg:items-end gap-2 justify-center lg:justify-start">
+                    <span className={`text-5xl sm:text-6xl md:text-7xl font-black bg-gradient-to-r ${tier.accent} bg-clip-text text-transparent`}>
+                      {tier.price}
                     </span>
-                  ))}
-                </div>
+                    <span className={cn(
+                      "text-xl mb-2",
+                      isDark ? "text-gray-400" : "text-gray-500"
+                    )}>{tier.period}</span>
+                  </div>
 
-                <button
-                  className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl ${tier.popular
+                  <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                    {tier.highlights.map((highlight) => (
+                      <span
+                        key={highlight}
+                        className={cn(
+                          "px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-medium border transition-colors",
+                          isDark ? "border-white/10 bg-white/5 text-gray-300" : "border-gray-200 bg-white text-gray-700"
+                        )}
+                      >
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    className={`w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl ${tier.popular
                       ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:shadow-blue-500/50'
                       : isDark
                         ? 'bg-white text-black hover:shadow-white/50'
-                        : 'bg-gray-800 text-white hover:shadow-gray-800/50'
-                    }`}
+                        : 'bg-gray-900 text-white hover:shadow-gray-900/50'
+                      }`}
+                  >
+                    Get Started
+                  </button>
+                </div>
+
+                {/* Right Content - Feature Card */}
+                <div
+                  className={cn(
+                    "rounded-3xl overflow-hidden border backdrop-blur-md transition-all duration-700",
+                    tier.popular
+                      ? "border-blue-400/50 shadow-2xl shadow-blue-500/10"
+                      : isDark ? "border-white/10" : "border-gray-200",
+                    isDark
+                      ? "bg-gradient-to-br from-white/5 to-transparent"
+                      : "bg-white/80"
+                  )}
+                  style={{
+                    transform: activeSection === index + 1
+                      ? 'perspective(1000px) rotateY(0deg) translateZ(0)'
+                      : 'perspective(1000px) rotateY(5deg) translateZ(-50px)',
+                    opacity: activeSection === index + 1 ? 1 : 0.8
+                  }}
                 >
-                  Get Started with {tier.name}
-                </button>
-              </div>
+                  <div className={`h-2 bg-gradient-to-r ${tier.accent}`} />
 
-              {/* Right Content - Feature Card */}
-              <div
-                className={cn(
-                  "rounded-3xl overflow-hidden border-2 backdrop-blur-sm",
-                  tier.popular
-                    ? "border-blue-400/50"
-                    : isDark ? "border-white/10" : "border-gray-200",
-                  isDark
-                    ? "bg-gradient-to-br from-white/5 to-white/0"
-                    : "bg-white/90"
-                )}
-                style={{
-                  opacity: activeSection === index ? 1 : 0,
-                  transform: `translateX(${activeSection === index ? '0' : '100px'}) rotateY(${activeSection === index ? '0' : '10deg'})`,
-                  transition: 'all 1s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transitionDelay: '0.2s'
-                }}
-              >
-                <div className={`h-2 bg-gradient-to-r ${tier.accent}`} />
-
-                <div className="p-8">
-                  <h3 className={cn(
-                    "text-2xl font-bold mb-6 flex items-center gap-2",
-                    isDark ? "text-white" : "text-gray-800"
-                  )}>
-                    <Check className="w-6 h-6 text-emerald-400" />
-                    Everything Included
-                  </h3>
-
-                  <ul className="space-y-4">
-                    {tier.features.map((feature, idx) => (
-                      <li
-                        key={feature}
-                        className={cn(
-                          "flex items-start gap-3",
-                          isDark ? "text-gray-300" : "text-gray-600"
-                        )}
-                        style={{
-                          opacity: activeSection === index ? 1 : 0,
-                          transform: `translateY(${activeSection === index ? '0' : '20px'})`,
-                          transition: 'all 0.5s ease-out',
-                          transitionDelay: `${0.3 + idx * 0.05}s`
-                        }}
-                      >
-                        <div className={`mt-1 p-1 rounded-full ${tier.accentSolid} flex-shrink-0`}>
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-base">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className={cn(
-                    "mt-8 pt-8 border-t",
-                    isDark ? "border-white/10" : "border-gray-200"
-                  )}>
-                    <p className={cn(
-                      "text-sm text-center",
-                      isDark ? "text-gray-400" : "text-gray-500"
+                  <div className="p-6 md:p-8 lg:p-10">
+                    <h3 className={cn(
+                      "text-xl md:text-2xl font-bold mb-6 flex items-center gap-2",
+                      isDark ? "text-white" : "text-gray-900"
                     )}>
-                      🎉 Contact us for a free consultation. No commitment required.
-                    </p>
+                      <Check className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" />
+                      Everything Included
+                    </h3>
+
+                    <ul className="space-y-4">
+                      {tier.features.map((feature, idx) => (
+                        <li
+                          key={feature}
+                          className={cn(
+                            "flex items-start gap-3",
+                            isDark ? "text-gray-300" : "text-gray-600"
+                          )}
+                        >
+                          <div className={`mt-0.5 p-1 rounded-full ${tier.accentSolid} flex-shrink-0`}>
+                            <Check className="w-2.5 h-2.5 text-white" />
+                          </div>
+                          <span className="text-sm md:text-base leading-snug">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className={cn(
+                      "mt-8 pt-8 border-t",
+                      isDark ? "border-white/10" : "border-gray-100"
+                    )}>
+                      <p className={cn(
+                        "text-sm text-center font-medium",
+                        isDark ? "text-gray-400" : "text-gray-500"
+                      )}>
+                        🎉 Contact us for a free consultation.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Section Number Indicator */}
-          <div className="absolute bottom-8 right-8">
-            <div className={cn(
-              "text-8xl font-bold",
-              isDark ? "text-white/5" : "text-gray-200"
-            )}>
-              0{index + 1}
+            {/* Section Number Indicator (Desktop Only) */}
+            <div className="hidden lg:block absolute bottom-8 right-8 pointer-events-none select-none">
+              <div className={cn(
+                "text-[10rem] font-black leading-none opacity-5",
+                isDark ? "text-white" : "text-black"
+              )}>
+                0{index + 1}
+              </div>
             </div>
-          </div>
-        </section>
-      ))}
+          </section>
+        ))}
+      </div>
 
       {/* Custom Plan Section */}
-      <section className="relative min-h-[70vh] flex items-center justify-center px-6 py-20">
+      <section className="relative min-h-[50vh] flex items-center justify-center px-4 py-20 sm:py-32">
         <div className={cn(
           "absolute inset-0",
           isDark
-            ? "bg-gradient-to-b from-emerald-900/10 via-blue-900/10 to-purple-900/10"
-            : "bg-gradient-to-b from-emerald-100/30 via-blue-100/30 to-purple-100/30"
+            ? "bg-gradient-to-b from-emerald-900/10 via-blue-900/5 to-purple-900/5"
+            : "bg-gradient-to-b from-emerald-100/30 via-blue-100/20 to-purple-100/20"
         )} />
 
         <div className="relative z-10 max-w-5xl mx-auto w-full">
           <div className={cn(
-            "rounded-3xl border backdrop-blur-md p-10 md:p-14 text-center",
+            "rounded-3xl border backdrop-blur-md p-8 md:p-14 text-center",
             isDark
               ? "border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent"
               : "border-gray-200 bg-white/90 shadow-xl"
@@ -393,78 +389,61 @@ const PricingPage = memo(() => {
               isDark ? "bg-white/5 border-white/15" : "bg-gray-100 border-gray-200"
             )}>
               <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span className={isDark ? "text-sm text-gray-300" : "text-sm text-gray-600"}>
+              <span className={cn(
+                "text-xs md:text-sm font-medium",
+                isDark ? "text-gray-300" : "text-gray-600"
+              )}>
                 Need something different?
               </span>
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-4">
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-4">
               <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Custom Plans for Your Project
               </span>
             </h2>
 
             <p className={cn(
-              "text-lg md:text-xl max-w-3xl mx-auto mb-8",
+              "text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed",
               isDark ? "text-gray-300" : "text-gray-600"
             )}>
-              Not sure which plan fits your idea? Tell us about your website, app, or social media goals and we'll craft a custom package with transparent pricing just for you.
+              Not sure which plan fits your idea? Tell us about your website, app, or social media goals and we'll craft a custom package.
             </p>
 
-            <div className="grid gap-6 md:grid-cols-3 text-left mb-10">
-              <div className={cn(
-                "p-4 rounded-2xl border",
-                isDark ? "bg-black/30 border-white/10" : "bg-gray-50 border-gray-200"
-              )}>
-                <h3 className={cn(
-                  "text-lg font-semibold mb-2",
-                  isDark ? "text-white" : "text-gray-800"
-                )}>Tailored to your scope</h3>
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-gray-300" : "text-gray-600"
-                )}>We adjust features, timelines, and budget based on exactly what you need.</p>
-              </div>
-              <div className={cn(
-                "p-4 rounded-2xl border",
-                isDark ? "bg-black/30 border-white/10" : "bg-gray-50 border-gray-200"
-              )}>
-                <h3 className={cn(
-                  "text-lg font-semibold mb-2",
-                  isDark ? "text-white" : "text-gray-800"
-                )}>Transparent pricing</h3>
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-gray-300" : "text-gray-600"
-                )}>No hidden charges – you get a clear breakdown before we start.</p>
-              </div>
-              <div className={cn(
-                "p-4 rounded-2xl border",
-                isDark ? "bg-black/30 border-white/10" : "bg-gray-50 border-gray-200"
-              )}>
-                <h3 className={cn(
-                  "text-lg font-semibold mb-2",
-                  isDark ? "text-white" : "text-gray-800"
-                )}>Support from day one</h3>
-                <p className={cn(
-                  "text-sm",
-                  isDark ? "text-gray-300" : "text-gray-600"
-                )}>We help you choose the right tech and roadmap for long-term growth.</p>
-              </div>
+            <div className="grid gap-6 md:grid-cols-3 text-left mb-12">
+              {[
+                { title: "Tailored Scope", desc: "We adjust features and timelines." },
+                { title: "Transparent Pricing", desc: "Clear breakdown before we start." },
+                { title: "Dedicated Support", desc: "We help you choose the right tech." }
+              ].map((item) => (
+                <div key={item.title} className={cn(
+                  "p-6 rounded-2xl border",
+                  isDark ? "bg-black/30 border-white/10" : "bg-gray-50 border-gray-200"
+                )}>
+                  <h3 className={cn(
+                    "text-lg font-bold mb-2",
+                    isDark ? "text-white" : "text-gray-900"
+                  )}>{item.title}</h3>
+                  <p className={cn(
+                    "text-sm leading-relaxed",
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  )}>{item.desc}</p>
+                </div>
+              ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <a
                 href="/contact"
-                className="bg-gradient-to-r from-emerald-400 to-blue-500 text-black font-bold py-4 px-10 rounded-full text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-400/50"
+                className="w-full sm:w-auto bg-gradient-to-r from-emerald-400 to-blue-500 text-white font-bold py-4 px-10 rounded-full text-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-400/50"
               >
-                Request a Custom Quote
+                Request Custom Quote
               </a>
               <p className={cn(
                 "text-sm max-w-xs",
                 isDark ? "text-gray-400" : "text-gray-500"
               )}>
-                Share your requirements, budget range, and timeline – we'll get back with a tailored proposal.
+                Share your requirements, budget range, and timeline.
               </p>
             </div>
           </div>
@@ -472,7 +451,7 @@ const PricingPage = memo(() => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 py-20">
+      <section className="relative min-h-[60vh] flex items-center justify-center px-6 py-20 pb-40 sm:py-32 sm:pb-48">
         <div className={cn(
           "absolute inset-0",
           isDark
@@ -480,26 +459,19 @@ const PricingPage = memo(() => {
             : "bg-gradient-to-t from-purple-100/30 to-transparent"
         )} />
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-7xl font-extrabold mb-6">
+        <div className="relative z-10 text-center max-w-4xl mx-auto w-full">
+          <h2 className="text-4xl md:text-7xl font-extrabold mb-6">
             <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
               Ready to get started?
             </span>
           </h2>
 
-          <p className={cn(
-            "text-xl md:text-2xl mb-12",
-            isDark ? "text-gray-300" : "text-gray-600"
-          )}>
-            Join clients already building amazing projects with {COMPANY.name}
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-5 px-10 rounded-full text-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/50">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <button className="w-full sm:w-auto bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-bold py-4 px-10 rounded-full text-lg md:text-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/50">
               Get Started Today
             </button>
             <button className={cn(
-              "border-2 font-semibold py-5 px-10 rounded-full text-xl transition-all",
+              "w-full sm:w-auto border-2 font-semibold py-4 px-10 rounded-full text-lg md:text-xl transition-all",
               isDark
                 ? "border-white/20 hover:border-white/40 text-white hover:bg-white/5"
                 : "border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-100"
@@ -508,14 +480,14 @@ const PricingPage = memo(() => {
             </button>
           </div>
 
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
             {[
               { icon: Users, label: "50+", desc: "Happy Clients" },
               { icon: Star, label: "4.9/5", desc: "Client Rating" },
               { icon: Shield, label: "100%", desc: "Satisfaction" }
             ].map((stat) => (
               <div key={stat.label} className={cn(
-                "p-6 rounded-2xl border",
+                "p-6 rounded-2xl border transition-colors hover:border-blue-400/30",
                 isDark ? "bg-white/5 border-white/10" : "bg-white border-gray-200 shadow-sm"
               )}>
                 <stat.icon className="w-8 h-8 mx-auto mb-3 text-blue-400" />
@@ -530,18 +502,21 @@ const PricingPage = memo(() => {
         </div>
       </section>
 
-      {/* Scroll Progress Indicator */}
-      <div className="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3">
-        {[0, 1, 2].map((idx) => (
+      {/* Scroll Progress Indicator (Desktop Only) */}
+      <div className="fixed right-8 top-1/2 -translate-y-1/2 z-50 hidden xl:flex flex-col gap-4">
+        {[0, 1, 2, 3].map((idx) => (
           <button
             key={idx}
             onClick={() => scrollToSection(idx)}
             className={cn(
-              "w-3 h-3 rounded-full transition-all duration-300",
+              "w-2.5 h-2.5 rounded-full transition-all duration-300",
               activeSection === idx
-                ? isDark ? 'bg-white scale-150' : 'bg-gray-800 scale-150'
-                : isDark ? 'bg-white/30 hover:bg-white/50' : 'bg-gray-400 hover:bg-gray-500'
+                ? "scale-150 bg-accent-primary"
+                : isDark ? "bg-white/20 hover:bg-white/40" : "bg-gray-300 hover:bg-gray-400",
+              activeSection === idx && isDark ? "bg-white" : "",
+              activeSection === idx && !isDark ? "bg-gray-900" : ""
             )}
+            aria-label={`Scroll to section ${idx + 1}`}
           />
         ))}
       </div>
@@ -559,9 +534,10 @@ const PricingPage = memo(() => {
         }
 
         .animate-fade-in {
-          animation: fade-in 1s ease-out;
+          animation: fade-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
+        /* Smooth scrolling for the whole page */
         html {
           scroll-behavior: smooth;
         }

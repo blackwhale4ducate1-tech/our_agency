@@ -738,9 +738,9 @@ const ServicePage = memo(() => {
                                 : "bg-white"
                         )} />
 
-                        {/* Header */}
+                        {/* Desktop Header - Hidden on mobile */}
                         <div className={cn(
-                            "relative grid grid-cols-3 gap-4 p-6 border-b",
+                            "relative hidden md:grid grid-cols-[1fr_120px_120px] gap-4 p-6 border-b",
                             isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"
                         )}>
                             <div className={cn(
@@ -748,74 +748,152 @@ const ServicePage = memo(() => {
                                 isDark ? "text-white" : "text-gray-800"
                             )}>Feature</div>
                             <div className="text-center">
-                                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-lg">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-lg">
                                     <Star className="w-4 h-4 text-white fill-white" />
-                                    <span className="text-white font-bold">{COMPANY.name}</span>
+                                    <span className="text-white font-bold text-sm">{COMPANY.name}</span>
                                 </div>
                             </div>
                             <div className="text-center">
                                 <div className={cn(
-                                    "inline-flex items-center gap-2 px-5 py-2.5 rounded-full border",
+                                    "inline-flex items-center gap-2 px-4 py-2 rounded-full border",
                                     isDark
                                         ? "bg-white/10 border-white/20"
                                         : "bg-gray-100 border-gray-200"
                                 )}>
-                                    <span className={isDark ? "text-gray-400 font-medium" : "text-gray-500 font-medium"}>Others</span>
+                                    <span className={isDark ? "text-gray-400 font-medium text-sm" : "text-gray-500 font-medium text-sm"}>Others</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Rows */}
-                        {comparisonFeatures.map((item, i) => (
-                            <div
-                                key={i}
-                                className={cn(
-                                    "comparison-row relative grid grid-cols-3 gap-4 p-5 border-b transition-colors",
-                                    isDark
-                                        ? `border-white/5 hover:bg-white/5 ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`
-                                        : `border-gray-100 hover:bg-gray-50 ${i % 2 === 0 ? 'bg-gray-50/50' : ''}`
-                                )}
-                            >
+                        {/* Mobile Header */}
+                        <div className={cn(
+                            "relative md:hidden p-4 border-b",
+                            isDark ? "border-white/10 bg-white/5" : "border-gray-200 bg-gray-50"
+                        )}>
+                            <div className="flex items-center justify-center gap-4">
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-lg">
+                                    <Star className="w-4 h-4 text-white fill-white" />
+                                    <span className="text-white font-bold text-sm">{COMPANY.name}</span>
+                                </div>
+                                <span className={isDark ? "text-gray-500" : "text-gray-400"}>vs</span>
                                 <div className={cn(
-                                    "flex items-center gap-3 font-medium",
-                                    isDark ? "text-gray-300" : "text-gray-700"
+                                    "px-4 py-2 rounded-full border",
+                                    isDark
+                                        ? "bg-white/10 border-white/20"
+                                        : "bg-gray-100 border-gray-200"
                                 )}>
-                                    <Target className="w-4 h-4 text-violet-400" />
-                                    {item.feature}
-                                </div>
-                                <div className="flex justify-center">
-                                    {item.us ? (
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-                                            <Check className="w-5 h-5 text-emerald-400" />
-                                        </div>
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                                            <X className="w-5 h-5 text-red-400" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex justify-center">
-                                    {item.others ? (
-                                        <div className={cn(
-                                            "w-10 h-10 rounded-full border flex items-center justify-center",
-                                            isDark
-                                                ? "bg-gray-500/20 border-gray-500/30"
-                                                : "bg-gray-200 border-gray-300"
-                                        )}>
-                                            <Check className={isDark ? "w-5 h-5 text-gray-400" : "w-5 h-5 text-gray-500"} />
-                                        </div>
-                                    ) : (
-                                        <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                                            <X className="w-5 h-5 text-red-400" />
-                                        </div>
-                                    )}
+                                    <span className={isDark ? "text-gray-400 font-medium text-sm" : "text-gray-500 font-medium text-sm"}>Others</span>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Desktop Rows */}
+                        <div className="hidden md:block">
+                            {comparisonFeatures.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "comparison-row relative grid grid-cols-[1fr_120px_120px] gap-4 p-5 border-b transition-colors",
+                                        isDark
+                                            ? `border-white/5 hover:bg-white/5 ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`
+                                            : `border-gray-100 hover:bg-gray-50 ${i % 2 === 0 ? 'bg-gray-50/50' : ''}`
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "flex items-center gap-3 font-medium",
+                                        isDark ? "text-gray-300" : "text-gray-700"
+                                    )}>
+                                        <Target className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                                        <span className="text-sm">{item.feature}</span>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        {item.us ? (
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                                <Check className="w-5 h-5 text-emerald-400" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                                                <X className="w-5 h-5 text-red-400" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex justify-center">
+                                        {item.others ? (
+                                            <div className={cn(
+                                                "w-10 h-10 rounded-full border flex items-center justify-center",
+                                                isDark
+                                                    ? "bg-gray-500/20 border-gray-500/30"
+                                                    : "bg-gray-200 border-gray-300"
+                                            )}>
+                                                <Check className={isDark ? "w-5 h-5 text-gray-400" : "w-5 h-5 text-gray-500"} />
+                                            </div>
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                                                <X className="w-5 h-5 text-red-400" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Mobile Rows - Card-style layout */}
+                        <div className="md:hidden divide-y divide-gray-100 dark:divide-white/5">
+                            {comparisonFeatures.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "comparison-row relative p-4 transition-colors",
+                                        isDark
+                                            ? `hover:bg-white/5 ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`
+                                            : `hover:bg-gray-50 ${i % 2 === 0 ? 'bg-gray-50/50' : ''}`
+                                    )}
+                                >
+                                    <div className={cn(
+                                        "flex items-center gap-2 font-medium mb-3",
+                                        isDark ? "text-gray-200" : "text-gray-800"
+                                    )}>
+                                        <Target className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                                        <span className="text-sm">{item.feature}</span>
+                                    </div>
+                                    <div className="flex items-center justify-center gap-8">
+                                        <div className="flex flex-col items-center gap-1">
+                                            {item.us ? (
+                                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500/30 to-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                                    <Check className="w-4 h-4 text-emerald-400" />
+                                                </div>
+                                            ) : (
+                                                <div className="w-9 h-9 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                                                    <X className="w-4 h-4 text-red-400" />
+                                                </div>
+                                            )}
+                                            <span className="text-xs text-violet-400 font-medium">Us</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-1">
+                                            {item.others ? (
+                                                <div className={cn(
+                                                    "w-9 h-9 rounded-full border flex items-center justify-center",
+                                                    isDark
+                                                        ? "bg-gray-500/20 border-gray-500/30"
+                                                        : "bg-gray-200 border-gray-300"
+                                                )}>
+                                                    <Check className={isDark ? "w-4 h-4 text-gray-400" : "w-4 h-4 text-gray-500"} />
+                                                </div>
+                                            ) : (
+                                                <div className="w-9 h-9 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                                                    <X className="w-4 h-4 text-red-400" />
+                                                </div>
+                                            )}
+                                            <span className={cn("text-xs font-medium", isDark ? "text-gray-500" : "text-gray-400")}>Others</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-16">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-16">
                         {[
                             { icon: Users, label: "500+", desc: "Happy Clients", gradient: "from-violet-500 to-fuchsia-500" },
                             { icon: Award, label: "50+", desc: "Awards Won", gradient: "from-blue-500 to-cyan-500" },
