@@ -323,7 +323,7 @@ const PricingPage = memo(() => {
                     </h3>
 
                     <ul className="space-y-4">
-                      {tier.features.map((feature, idx) => (
+                      {tier.features.map((feature) => (
                         <li
                           key={feature}
                           className={cn(
