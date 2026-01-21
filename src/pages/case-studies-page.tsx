@@ -188,7 +188,7 @@ const caseStudiesData: CaseStudyData[] = [
 
 const heroStats = [
     { label: "50+", desc: "Projects Delivered" },
-    { label: "98%", desc: "Client Satisfaction" },
+    { label: "99%", desc: "Client Satisfaction" },
     { label: "12+", desc: "Industries Served" },
     { label: "4", desc: "Case Studies" }
 ];
