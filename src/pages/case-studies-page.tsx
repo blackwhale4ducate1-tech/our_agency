@@ -177,7 +177,7 @@ const caseStudiesData: CaseStudyData[] = [
         ],
         result: "Their first flash sale hit 10x expected traffic. Zero downtime. Online revenue became a real business.",
         metrics: [
-            { value: "300%", label: "Revenue Up" },
+            { value: "40%", label: "Revenue Up" },
             { value: "99.99%", label: "Uptime" },
             { value: "2M+", label: "Visitors/Month" }
         ],
